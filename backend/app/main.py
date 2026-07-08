@@ -1,6 +1,10 @@
 from fastapi import FastAPI
+from app.core.logger import logger
 
 from app.config.settings import settings
+from app.config.logging import configure_logging
+
+configure_logging()
 
 app = FastAPI(
     title=settings.app_name,
@@ -10,6 +14,8 @@ app = FastAPI(
 
 @app.get("/")
 async def root():
+    logger.info("Root endpoint accessed")
+
     return {
         "app": settings.app_name,
         "environment": settings.app_env,
