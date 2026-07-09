@@ -8,27 +8,27 @@ from app.db.base_model import BaseModel
 class AuthProvider(str, Enum):
     LOCAL = "local"
     GOOGLE = "google"
-    GUTHUB = "github"
+    GITHUB = "github"
     
 class User(Base, BaseModel):
-    __tableaname__ = "users"
+    __tablename__ = "users"
     fullname: Mapped[str] = mapped_column(
-        String(225),
+        String(255),
         nullable=False
     )
     email: Mapped[str] = mapped_column(
-        String(225),
+        String(255),
         unique=True,
         index=True,
         nullable=False
     )
     password_hash: Mapped[str | None] = mapped_column(
-        String(225),
+        String(255),
         nullable=True
     )
-    avatar_url: Mapped[str |None] = mapped_column(
+    avatar_url: Mapped[str | None] = mapped_column(
         String(500),
-        nullable=true
+        nullable=True
     )
     provider: Mapped[AuthProvider] = mapped_column(
         SQLEnum(AuthProvider),
