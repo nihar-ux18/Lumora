@@ -26,7 +26,7 @@ class User(Base, BaseModel):
         String(225),
         nullable=True
     )
-    avtar_url: Mapped[str |None] = mapped_column(
+    avatar_url: Mapped[str |None] = mapped_column(
         String(500),
         nullable=true
     )
