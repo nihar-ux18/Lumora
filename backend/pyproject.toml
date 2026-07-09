@@ -12,6 +12,7 @@ dependencies = [
     "httpx>=0.28.1",
     "passlib[bcrypt]>=1.7.4",
     "psycopg[binary]>=3.3.4",
+    "pwdlib[argon2]>=0.3.0",
     "pydantic-settings>=2.14.2",
     "python-dotenv>=1.2.2",
     "python-jose>=3.5.0",
