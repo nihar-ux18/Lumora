@@ -3,8 +3,12 @@ from fastapi import FastAPI
 from app.api.health import router as health_router
 from app.config.logging import configure_logging
 from app.config.settings import settings
+from app.core.handlers import register_exception_handlers
 from app.core.lifespan import lifespan
 from app.core.logger import logger
+from app.core.middleware import RequestContextMiddleware
+from app.core.exceptions import ResourceNotFoundError
+
 
 configure_logging()
 
@@ -14,6 +18,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(RequestContextMiddleware)
+
+register_exception_handlers(app)
+
 app.include_router(health_router)
 
 
@@ -22,8 +30,12 @@ async def root():
     logger.info("Root endpoint accessed")
 
     return {
-        "app": settings.app_name,
+        "name": settings.app_name,
+        "version": settings.app_version,
         "environment": settings.app_env,
         "status": "running",
-        "version": settings.app_version,
     }
+    
+@app.get("/test-error")
+async def test_error():
+    raise ResourceNotFoundError("User not found")
