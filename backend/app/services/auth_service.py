@@ -8,7 +8,7 @@ from app.schemas.auth import (LoginRequest, RegisterRequest, TokenResponse)
 
 class AuthService:
     def __init__(self, repository: AuthRepository):
-        self.repository=repository
+        self.repository = repository
         
     async def register(self, data: RegisterRequest) -> User:
         existing_user = await self.repository.get_user_by_email(data.email)

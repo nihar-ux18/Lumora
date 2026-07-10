@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api.health import router as health_router
+from app.api import api_router
 from app.config.logging import configure_logging
 from app.config.settings import settings
 from app.core.handlers import register_exception_handlers
@@ -22,8 +22,7 @@ app.add_middleware(RequestContextMiddleware)
 
 register_exception_handlers(app)
 
-app.include_router(health_router)
-
+app.include_router(api_router)
 
 @app.get("/")
 async def root():
