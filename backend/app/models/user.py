@@ -1,9 +1,13 @@
 from datetime import datetime
 from enum import Enum
 from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 from app.db.base_model import BaseModel
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.email_verification import EmailVerificationToken
 
 class AuthProvider(str, Enum):
     LOCAL = "local"
@@ -49,4 +53,7 @@ class User(Base, BaseModel):
         DateTime(timezone=True),
         nullable=True,
     )
-    
+    verification_tokens: Mapped[list["EmailVerificationToken"]] = relationship(
+    back_populates="user",
+    cascade="all, delete-orphan",
+    )

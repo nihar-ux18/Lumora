@@ -1,5 +1,6 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any
+import secrets
 
 from jose import JWTError, jwt
 from pwdlib import PasswordHash
@@ -72,3 +73,7 @@ def decode_token(token: str) -> dict[str, Any]:
 
     except JWTError as exc:
         raise ValueError("Invalid or expired token") from exc
+    
+def generate_email_verification_token() -> str:
+    """Generate a secure email verification token."""
+    return secrets.token_urlsafe(32)

@@ -19,11 +19,19 @@ class Settings(BaseSettings):
     host: str = Field(default="0.0.0.0", alias="HOST")
     port: int = Field(default=8000, alias="PORT")
 
+    backend_url: str = Field(
+        default="http://localhost:8000",
+        alias="BACKEND_URL",
+    )
+
     database_url: str = Field(alias="DATABASE_URL")
     redis_url: str = Field(alias="REDIS_URL")
 
     jwt_secret_key: str = Field(alias="JWT_SECRET_KEY")
-    jwt_algorithm: str = Field(default="HS256", alias="JWT_ALGORITHM")
+    jwt_algorithm: str = Field(
+        default="HS256",
+        alias="JWT_ALGORITHM",
+    )
 
     access_token_expire_minutes: int = Field(
         default=15,
@@ -35,8 +43,20 @@ class Settings(BaseSettings):
         alias="REFRESH_TOKEN_EXPIRE_DAYS",
     )
 
-    openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
-    gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
+    email_verification_expire_hours: int = Field(
+        default=24,
+        alias="EMAIL_VERIFICATION_EXPIRE_HOURS",
+    )
+
+    openai_api_key: str = Field(
+        default="",
+        alias="OPENAI_API_KEY",
+    )
+
+    gemini_api_key: str = Field(
+        default="",
+        alias="GEMINI_API_KEY",
+    )
 
     cors_origins: str = Field(alias="CORS_ORIGINS")
 
