@@ -9,6 +9,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.models.email_verification import EmailVerificationToken
 
+class Role(str, Enum):
+    USER = "user"
+    ADMIN = "admin"
+    
 class AuthProvider(str, Enum):
     LOCAL = "local"
     GOOGLE = "google"
@@ -39,6 +43,11 @@ class User(Base, BaseModel):
         default=AuthProvider.LOCAL,
         nullable=False,
     )
+    role: Mapped[Role] = mapped_column(
+        SQLEnum(Role),
+        default=Role.USER,
+        nullable=False,
+    )
     is_verified: Mapped[bool] = mapped_column(
         Boolean,
         default=False,
@@ -57,3 +66,4 @@ class User(Base, BaseModel):
     back_populates="user",
     cascade="all, delete-orphan",
     )
+    

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, Query
 
 from app.api.deps import get_auth_service
 from app.api.deps import get_current_active_user
+from app.api.deps import require_admin
 from app.schemas.auth import (LoginRequest, RefreshTokenRequest, RegisterRequest, ResendVerificationRequest, TokenResponse)
 from app.schemas.user import UserResponse
 from app.services.auth_service import AuthService
@@ -43,3 +44,7 @@ async def refresh_token(request: RefreshTokenRequest,service: AuthService = Depe
 @router.get("/me",response_model=UserResponse,)
 async def get_me(current_user=Depends(get_current_active_user),):
     return current_user
+
+@router.get("/admin")
+async def admin_dashboard(current_user=Depends(require_admin()),):
+    return {"message": "Welcome Admin!","user": current_user.email,}

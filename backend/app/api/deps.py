@@ -1,5 +1,7 @@
 from fastapi import Depends
 
+from fastapi import HTTPException, status
+from app.models.user import Role
 from app.core.security import oauth2_scheme
 from app.db.session import get_db
 from app.repositories.auth_repository import AuthRepository
@@ -30,3 +32,20 @@ async def get_current_user(
     
 async def get_current_active_user(user=Depends(get_current_user)):
     return await AuthService.validate_active_user(user)
+
+def require_roles(*roles: Role):
+    async def dependency(
+        current_user=Depends(get_current_active_user),
+    ):
+        if current_user.role not in roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions.",
+            )
+
+        return current_user
+
+    return dependency
+
+def require_admin():
+    return require_roles(Role.ADMIN)
