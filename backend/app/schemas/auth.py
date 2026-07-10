@@ -16,3 +16,6 @@ class TokenResponse(BaseModel):
     
 class ResendVerificationRequest(BaseModel):
     email: EmailStr
+    
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str

@@ -77,3 +77,19 @@ def decode_token(token: str) -> dict[str, Any]:
 def generate_email_verification_token() -> str:
     """Generate a secure email verification token."""
     return secrets.token_urlsafe(32)
+
+def validate_refresh_token(token: str) -> str:
+    """
+    Validate a refresh token and return the user ID.
+    """
+    payload = decode_token(token)
+
+    if payload.get("type") != "refresh":
+        raise ValueError("Invalid refresh token.")
+
+    subject = payload.get("sub")
+
+    if subject is None:
+        raise ValueError("Invalid refresh token.")
+
+    return subject

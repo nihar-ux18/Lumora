@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status, Query
 
 from app.api.deps import get_auth_service
-from app.schemas.auth import (LoginRequest, RegisterRequest, ResendVerificationRequest, TokenResponse)
+from app.schemas.auth import (LoginRequest, RefreshTokenRequest, RegisterRequest, ResendVerificationRequest, TokenResponse)
 from app.schemas.user import UserResponse
 from app.services.auth_service import AuthService
 
@@ -38,3 +38,15 @@ async def resend_verification(
     return {
         "message": "Verification email sent."
     }
+    
+@router.post(
+    "/refresh",
+    response_model=TokenResponse,
+)
+async def refresh_token(
+    request: RefreshTokenRequest,
+    service: AuthService = Depends(get_auth_service),
+):
+    return await service.refresh_token(
+        request.refresh_token
+    )

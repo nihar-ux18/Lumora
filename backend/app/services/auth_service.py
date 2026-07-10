@@ -3,7 +3,7 @@ from datetime import UTC, datetime, timedelta
 from app.config.settings import settings
 from app.core.exceptions import (ConflictError, ResourceNotFoundError, UnauthorizedError)
 from app.core.logger import logger
-from app.core.security import (create_access_token, create_refresh_token, generate_email_verification_token, hash_password, verify_password)
+from app.core.security import (create_access_token, create_refresh_token, validate_refresh_token, generate_email_verification_token, hash_password, verify_password)
 from app.models.email_verification import EmailVerificationToken
 from app.models.user import User
 from app.repositories.auth_repository import AuthRepository
@@ -146,4 +146,23 @@ class AuthService:
             "Verification email regenerated",
             email=user.email,
             verification_link=verification_link,
+        )
+    
+    async def refresh_token(self, refresh_token: str,) -> TokenResponse:
+        try:
+            user_id = validate_refresh_token(refresh_token)
+        except ValueError:
+            raise UnauthorizedError("Invalid refresh token.")
+    
+        user = await self.repository.get_user_by_id(user_id)
+    
+        if user is None:
+            raise UnauthorizedError("User not found.")
+    
+        if not user.is_active:
+            raise UnauthorizedError("User account is inactive.")
+    
+        return TokenResponse(
+            access_token=create_access_token(str(user.id)),
+            refresh_token=create_refresh_token(str(user.id)),
         )
