@@ -4,6 +4,7 @@ from app.config.settings import settings
 from app.core.exceptions import (ConflictError, ResourceNotFoundError, UnauthorizedError)
 from app.core.logger import logger
 from app.core.security import (create_access_token, create_refresh_token, validate_refresh_token, generate_email_verification_token, hash_password, verify_password)
+from app.core.security import decode_token
 from app.models.email_verification import EmailVerificationToken
 from app.models.user import User
 from app.repositories.auth_repository import AuthRepository
@@ -166,3 +167,28 @@ class AuthService:
             access_token=create_access_token(str(user.id)),
             refresh_token=create_refresh_token(str(user.id)),
         )
+        
+    async def get_current_user(self,token: str,) -> User:
+        try:
+            payload = decode_token(token)
+        except ValueError:
+            raise UnauthorizedError("Invalid access token.")
+
+        if payload.get("type") != "access":
+            raise UnauthorizedError("Invalid access token.")
+
+        user = await self.repository.get_user_by_id(
+            payload["sub"]
+        )
+
+        if user is None:
+            raise UnauthorizedError("User not found.")
+
+        return user
+    
+    @staticmethod
+    async def validate_active_user(user: User)->User:
+        if not user.is_active:
+            raise UnauthorizedError("Inactive User")
+        
+        return user

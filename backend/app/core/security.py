@@ -1,11 +1,16 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any
 import secrets
+from fastapi.security import OAuth2PasswordBearer
 
 from jose import JWTError, jwt
 from pwdlib import PasswordHash
 
 from app.config.settings import settings
+
+oauth2_scheme = OAuth2PasswordBearer(
+    tokenUrl="/auth/login",
+)
 
 password_hash = PasswordHash.recommended()
 
