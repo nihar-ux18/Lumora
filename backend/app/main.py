@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.api import api_router
 from app.config.logging import configure_logging
@@ -6,8 +7,9 @@ from app.config.settings import settings
 from app.core.handlers import register_exception_handlers
 from app.core.lifespan import lifespan
 from app.core.logger import logger
-from app.core.middleware import RequestContextMiddleware
+from app.core.middleware import RequestContextMiddleware 
 from app.core.exceptions import ResourceNotFoundError
+from app.api.oauth import router as oauth_router
 
 
 configure_logging()
@@ -18,10 +20,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.add_middleware(RequestContextMiddleware)
+app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret_key,)
 
 register_exception_handlers(app)
-
+app.include_router(oauth_router)
 app.include_router(api_router)
 
 @app.get("/")

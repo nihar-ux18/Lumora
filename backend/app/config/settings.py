@@ -57,6 +57,26 @@ class Settings(BaseSettings):
         default="",
         alias="GEMINI_API_KEY",
     )
+    
+    google_client_id: str = Field(
+    default="",
+    alias="GOOGLE_CLIENT_ID",
+    )
+
+    google_client_secret: str = Field(
+        default="",
+        alias="GOOGLE_CLIENT_SECRET",
+    )
+
+    github_client_id: str = Field(
+        default="",
+        alias="GITHUB_CLIENT_ID",
+    )
+
+    github_client_secret: str = Field(
+        default="",
+        alias="GITHUB_CLIENT_SECRET",
+    )
 
     cors_origins: str = Field(alias="CORS_ORIGINS")
 
