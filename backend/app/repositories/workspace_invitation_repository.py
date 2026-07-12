@@ -20,8 +20,8 @@ class WorkspaceInvitationRepository:
         return invitation
 
     async def get_by_token(
-        self,
-        token: str,
+    self,
+    token: str,
     ) -> WorkspaceInvitation | None:
         result = await self.db.execute(
             select(WorkspaceInvitation).where(

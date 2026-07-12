@@ -17,6 +17,7 @@ from app.schemas.workspace_invitation import (
     InviteMemberRequest,
     WorkspaceInvitationResponse,
 )
+from app.schemas.workspace import AcceptInvitationRequest
 from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
 
@@ -113,4 +114,17 @@ async def invite_member(
         workspace_id=workspace_id,
         current_user_id=current_user.id,
         email=data.email,
+    )
+    
+@router.post("/invitations/accept")
+async def accept_invitation(
+    data: AcceptInvitationRequest,
+    current_user=Depends(get_current_active_user),
+    service: WorkspaceMemberService = Depends(
+        get_workspace_member_service,
+    ),
+):
+    return await service.accept_invitation(
+        token=data.token,
+        current_user_id=current_user.id,
     )

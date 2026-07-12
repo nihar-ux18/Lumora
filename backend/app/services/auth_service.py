@@ -33,7 +33,7 @@ class AuthService:
             raise ConflictError("Email already registered")
 
         user = User(
-            fullname=data.full_name,
+            fullname=data.fullname,
             email=data.email,
             password_hash=hash_password(data.password),
         )

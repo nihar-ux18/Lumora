@@ -39,7 +39,6 @@ app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret_key,)
 register_exception_handlers(app)
 app.include_router(oauth_router)
 app.include_router(api_router)
-app.include_router(users_router)
 
 @app.get("/")
 async def root():

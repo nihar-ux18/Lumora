@@ -2,16 +2,11 @@ from datetime import UTC, datetime, timedelta
 import secrets
 from uuid import UUID
 
-from app.core.exceptions import (
-    ForbiddenError,
-    ResourceNotFoundError,
-    ConflictError,
-)
+from app.core.exceptions import (ForbiddenError,ResourceNotFoundError,ConflictError,)
 
 from app.models.workspace_member import WorkspaceRole
 from app.models.workspace_invitation import WorkspaceInvitation
-
-
+from app.models.workspace_member import (WorkspaceMember,WorkspaceRole,)
 from app.repositories.workspace_repository import WorkspaceRepository
 from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
 from app.repositories.workspace_invitation_repository import (WorkspaceInvitationRepository,)
@@ -72,3 +67,45 @@ class WorkspaceMemberService:
         )
 
         return await self.invitation_repository.create(invitation)
+    
+    async def accept_invitation(
+    self,
+    token: str,
+    current_user_id: UUID,
+    ):
+        invitation = await self.invitation_repository.get_by_token(
+            token
+        )
+
+        if not invitation:
+            raise ResourceNotFoundError("Invitation not found.")
+        
+        if invitation.accepted:
+            raise ConflictError("Invitation has already been accepted.")
+        
+        if invitation.expires_at < datetime.now(UTC):
+            raise ConflictError("Invitation expired.")
+        
+        existing_member = await self.member_repository.get_member(
+        invitation.workspace_id,
+        current_user_id,
+        )
+
+        if existing_member:
+            raise ConflictError(
+                "You are already a member of this workspace."
+            )
+            
+        member = WorkspaceMember(
+            workspace_id=invitation.workspace_id,
+            user_id=current_user_id,
+            role=WorkspaceRole.MEMBER,
+        )
+
+        await self.member_repository.create(member)
+        
+        invitation.accepted = True
+
+        await self.invitation_repository.update(invitation)
+
+        return member

@@ -6,12 +6,26 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class WorkspaceCreate(BaseModel):
     name: str = Field(min_length=2, max_length=255)
-    description: str | None = Field(default=None, max_length=1000)
+    description: str | None = Field(
+        default=None,
+        max_length=1000,
+    )
 
 
 class WorkspaceUpdate(BaseModel):
-    name: str | None = Field(default=None, min_length=2, max_length=255)
-    description: str | None = Field(default=None, max_length=1000)
+    name: str | None = Field(
+        default=None,
+        min_length=2,
+        max_length=255,
+    )
+    description: str | None = Field(
+        default=None,
+        max_length=1000,
+    )
+
+
+class AcceptInvitationRequest(BaseModel):
+    token: str
 
 
 class WorkspaceResponse(BaseModel):
