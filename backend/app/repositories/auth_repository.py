@@ -52,9 +52,7 @@ class AuthRepository:
 
     async def get_password_reset_token(self,token: str,) -> PasswordResetToken | None:
         result = await self.db.execute(
-            select(PasswordResetToken).where(
-                PasswordResetToken.token == token
-            )
+            select(PasswordResetToken).where(PasswordResetToken.token == token)
         )
         return result.scalar_one_or_none()
 
@@ -63,3 +61,8 @@ class AuthRepository:
         await self.db.commit()
         await self.db.refresh(token)
         return token
+    
+    async def update_user_profile(self,user: User,) -> User:
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user

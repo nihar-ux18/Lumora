@@ -10,6 +10,7 @@ from app.models.email_verification import EmailVerificationToken
 from app.models.user import User
 from app.repositories.auth_repository import AuthRepository
 from app.schemas.auth import (LoginRequest, RegisterRequest, TokenResponse)
+from app.schemas.user import UpdateProfileRequest
 from app.repositories.email_verification_repository import (EmailVerificationRepository,)
 from app.models.password_reset import PasswordResetToken
 from app.core.exceptions import ResourceNotFoundError
@@ -224,6 +225,7 @@ class AuthService:
         )
         
     async def reset_password(self,token: str,new_password: str,) -> None:
+    
         reset = await self.repository.get_password_reset_token(token)
     
         if reset is None:
@@ -246,3 +248,12 @@ class AuthService:
     
         await self.repository.update_user(user)
         await self.repository.update_password_reset_token(reset)
+        
+    async def update_profile(self,user: User,data: UpdateProfileRequest,) -> User:
+        if data.fullname is not None:
+            user.fullname = data.fullname
+    
+        if data.avatar_url is not None:
+            user.avatar_url = data.avatar_url
+    
+        return await self.repository.update_user_profile(user)

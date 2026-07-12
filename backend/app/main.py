@@ -10,6 +10,7 @@ from app.core.logger import logger
 from app.core.middleware import RequestContextMiddleware 
 from app.core.exceptions import ResourceNotFoundError
 from app.api.oauth import router as oauth_router
+from app.api.users import router as users_router
 
 
 configure_logging()
@@ -25,6 +26,7 @@ app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret_key,)
 register_exception_handlers(app)
 app.include_router(oauth_router)
 app.include_router(api_router)
+app.include_router(users_router)
 
 @app.get("/")
 async def root():
