@@ -9,7 +9,7 @@ async def lumora_exception_handler(
     exc: LumoraException,
 ):
     return JSONResponse(
-        status_code=400,
+        status_code=exc.status_code,
         content={
             "success": False,
             "error": exc.message,

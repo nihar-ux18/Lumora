@@ -6,6 +6,9 @@ from app.core.security import oauth2_scheme
 from app.db.session import get_db
 from app.repositories.auth_repository import AuthRepository
 from app.repositories.workspace_repository import WorkspaceRepository
+from app.repositories.workspace_member_repository import WorkspaceMemberRepository
+from app.repositories.workspace_invitation_repository import WorkspaceInvitationRepository
+from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
 from app.services.auth_service import AuthService
 from app.repositories.email_verification_repository import (EmailVerificationRepository,)
@@ -56,3 +59,14 @@ def get_workspace_service(db: AsyncSession = Depends(get_db),) -> WorkspaceServi
     repository = WorkspaceRepository(db)
 
     return WorkspaceService(repository)
+
+def get_workspace_member_service(
+    db: AsyncSession = Depends(get_db),
+) -> WorkspaceMemberService:
+
+    return WorkspaceMemberService(
+        workspace_repository=WorkspaceRepository(db),
+        member_repository=WorkspaceMemberRepository(db),
+        invitation_repository=WorkspaceInvitationRepository(db),
+        auth_repository=AuthRepository(db),
+    )

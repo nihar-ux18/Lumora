@@ -12,6 +12,12 @@ from app.schemas.workspace import (
     WorkspaceResponse,
     WorkspaceUpdate,
 )
+from app.api.deps import get_workspace_member_service
+from app.schemas.workspace_invitation import (
+    InviteMemberRequest,
+    WorkspaceInvitationResponse,
+)
+from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
 
 router = APIRouter(
@@ -88,4 +94,23 @@ async def delete_workspace(
     await service.delete_workspace(
         current_user,
         workspace_id,
+    )
+    
+@router.post(
+    "/{workspace_id}/invite",
+    response_model=WorkspaceInvitationResponse,
+    status_code=201,
+)
+async def invite_member(
+    workspace_id: UUID,
+    data: InviteMemberRequest,
+    current_user=Depends(get_current_active_user),
+    service: WorkspaceMemberService = Depends(
+        get_workspace_member_service,
+    ),
+):
+    return await service.invite_user(
+        workspace_id=workspace_id,
+        current_user_id=current_user.id,
+        email=data.email,
     )

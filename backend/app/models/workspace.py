@@ -30,3 +30,15 @@ class Workspace(Base, BaseModel):
         "User",
         back_populates="workspaces",
     )
+    
+    members = relationship(
+    "WorkspaceMember",
+    back_populates="workspace",
+    cascade="all, delete-orphan",
+    )
+
+    invitations = relationship(
+        "WorkspaceInvitation",
+        back_populates="workspace",
+        cascade="all, delete-orphan",
+    )

@@ -1,5 +1,10 @@
+from fastapi import status
+
+
 class LumoraException(Exception):
     """Base exception for Lumora."""
+
+    status_code = status.HTTP_400_BAD_REQUEST
 
     def __init__(self, message: str):
         self.message = message
@@ -7,12 +12,16 @@ class LumoraException(Exception):
 
 
 class ResourceNotFoundError(LumoraException):
-    """Raised when a resource does not exist."""
+    status_code = status.HTTP_404_NOT_FOUND
 
 
 class ConflictError(LumoraException):
-    """Raised when a resource already exists."""
+    status_code = status.HTTP_409_CONFLICT
 
 
 class UnauthorizedError(LumoraException):
-    """Raised when authentication fails."""
+    status_code = status.HTTP_401_UNAUTHORIZED
+
+
+class ForbiddenError(LumoraException):
+    status_code = status.HTTP_403_FORBIDDEN
