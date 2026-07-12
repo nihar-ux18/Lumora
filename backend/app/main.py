@@ -11,6 +11,8 @@ from app.core.middleware import RequestContextMiddleware
 from app.core.exceptions import ResourceNotFoundError
 from app.api.oauth import router as oauth_router
 from app.api.users import router as users_router
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
 
 
 configure_logging()
@@ -19,6 +21,17 @@ app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     lifespan=lifespan,
+)
+
+UPLOAD_DIR = Path("uploads")
+
+UPLOAD_DIR.mkdir(exist_ok=True)
+(UPLOAD_DIR / "avatars").mkdir(exist_ok=True)
+
+app.mount(
+    "/uploads",
+    StaticFiles(directory=UPLOAD_DIR),
+    name="uploads",
 )
 
 app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret_key,)

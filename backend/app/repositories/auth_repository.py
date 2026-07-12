@@ -66,3 +66,8 @@ class AuthRepository:
         await self.db.commit()
         await self.db.refresh(user)
         return user
+    
+    async def update_avatar(self,user: User,) -> User:
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user

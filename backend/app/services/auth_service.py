@@ -1,5 +1,7 @@
 from datetime import UTC, datetime, timedelta
 from secrets import token_urlsafe
+from fastapi import UploadFile
+from app.utils.file_upload import save_avatar
 
 from app.config.settings import settings
 from app.core.exceptions import (ConflictError, ResourceNotFoundError, UnauthorizedError)
@@ -257,3 +259,10 @@ class AuthService:
             user.avatar_url = data.avatar_url
     
         return await self.repository.update_user_profile(user)
+    
+    async def upload_avatar(self,user: User,file: UploadFile,) -> User:
+        avatar_url = await save_avatar(file)
+    
+        user.avatar_url = avatar_url
+    
+        return await self.repository.update_avatar(user)
