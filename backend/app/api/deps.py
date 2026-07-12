@@ -5,6 +5,8 @@ from app.models.user import Role
 from app.core.security import oauth2_scheme
 from app.db.session import get_db
 from app.repositories.auth_repository import AuthRepository
+from app.repositories.workspace_repository import WorkspaceRepository
+from app.services.workspace_service import WorkspaceService
 from app.services.auth_service import AuthService
 from app.repositories.email_verification_repository import (EmailVerificationRepository,)
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,3 +51,8 @@ def require_roles(*roles: Role):
 
 def require_admin():
     return require_roles(Role.ADMIN)
+
+def get_workspace_service(db: AsyncSession = Depends(get_db),) -> WorkspaceService:
+    repository = WorkspaceRepository(db)
+
+    return WorkspaceService(repository)

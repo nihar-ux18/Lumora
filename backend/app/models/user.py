@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from app.models.workspace import Workspace
 from sqlalchemy import Boolean, DateTime, Enum as SQLEnum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
@@ -66,4 +67,5 @@ class User(Base, BaseModel):
     back_populates="user",
     cascade="all, delete-orphan",
     )
+    workspaces: Mapped[list["Workspace"]] = relationship("Workspace",back_populates="owner",cascade="all, delete-orphan",)
     
