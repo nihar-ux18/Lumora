@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from secrets import token_urlsafe
 
 from app.config.settings import settings
 from app.core.exceptions import (ConflictError, ResourceNotFoundError, UnauthorizedError)
@@ -10,6 +11,10 @@ from app.models.user import User
 from app.repositories.auth_repository import AuthRepository
 from app.schemas.auth import (LoginRequest, RegisterRequest, TokenResponse)
 from app.repositories.email_verification_repository import (EmailVerificationRepository,)
+from app.models.password_reset import PasswordResetToken
+from app.core.exceptions import ResourceNotFoundError
+from app.services.email_service import send_verification_email
+from app.services.email_service import send_password_reset_email
 
 class AuthService:
     def __init__(self, repository: AuthRepository, email_repository: EmailVerificationRepository,):
@@ -42,6 +47,12 @@ class AuthService:
         )
 
         await self.email_repository.create(verification)
+        
+        await send_verification_email(
+        to_email=user.email,
+        to_name=user.fullname,
+        token=verification.token,
+        )
 
         verification_link = (
             f"{settings.backend_url}/auth/verify-email"
@@ -192,3 +203,46 @@ class AuthService:
             raise UnauthorizedError("Inactive User")
         
         return user
+    
+    async def forgot_password(self, email: str) -> None:
+        user = await self.repository.get_user_by_email(email)
+
+        if user is None:
+            return
+
+        reset_token = PasswordResetToken(
+            user_id=user.id,
+            token=token_urlsafe(32),
+            expires_at=datetime.now(UTC) + timedelta(minutes=30),
+        )
+
+        await self.repository.create_password_reset_token(reset_token)
+        await send_password_reset_email(
+        to_email=user.email,
+        to_name=user.fullname,
+        token=reset_token.token,
+        )
+        
+    async def reset_password(self,token: str,new_password: str,) -> None:
+        reset = await self.repository.get_password_reset_token(token)
+    
+        if reset is None:
+            raise ResourceNotFoundError("Invalid reset token")
+    
+        if reset.used:
+            raise ResourceNotFoundError("Reset token already used")
+    
+        if reset.expires_at < datetime.now(UTC):
+            raise ResourceNotFoundError("Reset token expired")
+    
+        user = await self.repository.get_user_by_id(reset.user_id)
+    
+        if user is None:
+            raise ResourceNotFoundError("User not found")
+    
+        user.password_hash = hash_password(new_password)
+    
+        reset.used = True
+    
+        await self.repository.update_user(user)
+        await self.repository.update_password_reset_token(reset)

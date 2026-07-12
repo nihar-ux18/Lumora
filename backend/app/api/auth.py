@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, status, Query
 from app.api.deps import get_auth_service
 from app.api.deps import get_current_active_user
 from app.api.deps import require_admin
-from app.schemas.auth import (LoginRequest, RefreshTokenRequest, RegisterRequest, ResendVerificationRequest, TokenResponse)
+from app.schemas.auth import (LoginRequest, RefreshTokenRequest, RegisterRequest, ResendVerificationRequest, TokenResponse, ForgotPasswordRequest, ResetPasswordRequest)
 from app.schemas.user import UserResponse
 from app.services.auth_service import AuthService
 
@@ -48,3 +48,23 @@ async def get_me(current_user=Depends(get_current_active_user),):
 @router.get("/admin")
 async def admin_dashboard(current_user=Depends(require_admin()),):
     return {"message": "Welcome Admin!","user": current_user.email,}
+
+@router.post("/forgot-password", status_code=200)
+async def forgot_password(data: ForgotPasswordRequest,service: AuthService = Depends(get_auth_service),):
+    await service.forgot_password(data.email)
+    return {
+        "message": (
+            "If an account with that email exists, "
+            "a password reset link has been sent."
+        )
+    }
+    
+@router.post("/reset-password", status_code=200)
+async def reset_password(data: ResetPasswordRequest,service: AuthService = Depends(get_auth_service),):
+    await service.reset_password(
+        token=data.token,
+        new_password=data.new_password,
+    )
+    return {
+        "message": "Password reset successfully."
+    }

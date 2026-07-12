@@ -15,7 +15,11 @@ class Settings(BaseSettings):
     app_version: str = Field(default="0.1.0", alias="APP_VERSION")
     app_env: str = Field(default="development", alias="APP_ENV")
     debug: bool = Field(default=True, alias="DEBUG")
-
+    brevo_api_key: str = Field(alias="BREVO_API_KEY")
+    brevo_sender_email: str = Field(alias="BREVO_SENDER_EMAIL")
+    brevo_sender_name: str = Field(default="Lumora", alias="BREVO_SENDER_NAME")
+    frontend_url: str = Field(default="http://localhost:3000",alias="FRONTEND_URL",)
+    
     host: str = Field(default="0.0.0.0", alias="HOST")
     port: int = Field(default=8000, alias="PORT")
 

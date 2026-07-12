@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from app.models.password_reset import PasswordResetToken
 from app.models.user import User
 
 class AuthRepository:
@@ -42,3 +42,24 @@ class AuthRepository:
         """Delete a user"""
         await self.db.delete(user)
         await self.db.commit()
+    
+    async def create_password_reset_token(self,token: PasswordResetToken,) -> PasswordResetToken:
+        self.db.add(token)
+        await self.db.commit()
+        await self.db.refresh(token)
+        return token
+
+
+    async def get_password_reset_token(self,token: str,) -> PasswordResetToken | None:
+        result = await self.db.execute(
+            select(PasswordResetToken).where(
+                PasswordResetToken.token == token
+            )
+        )
+        return result.scalar_one_or_none()
+
+
+    async def update_password_reset_token(self,token: PasswordResetToken,) -> PasswordResetToken:
+        await self.db.commit()
+        await self.db.refresh(token)
+        return token
