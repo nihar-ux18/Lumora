@@ -80,3 +80,8 @@ class User(Base, BaseModel):
         cascade="all, delete-orphan",
     )
     
+    resources = relationship(
+        "Resource",
+        back_populates="uploader",
+        cascade="all, delete-orphan",
+    )

@@ -42,3 +42,9 @@ class Workspace(Base, BaseModel):
         back_populates="workspace",
         cascade="all, delete-orphan",
     )
+    
+    resources = relationship(
+        "Resource",
+        back_populates="workspace",
+        cascade="all, delete-orphan",
+    )
