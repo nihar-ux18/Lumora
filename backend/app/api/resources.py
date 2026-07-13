@@ -1,6 +1,11 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    UploadFile,
+)
 
 from app.api.deps import (
     get_current_user,
@@ -99,3 +104,21 @@ async def delete_resource(
     return {
         "message": "Resource deleted successfully."
     }
+    
+@router.post(
+    "/resources/{resource_id}/upload",
+    response_model=ResourceResponse,
+)
+async def upload_resource(
+    resource_id: UUID,
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    service: ResourceService = Depends(
+        get_resource_service,
+    ),
+):
+    return await service.upload_resource_file(
+        resource_id=resource_id,
+        current_user=current_user,
+        file=file,
+    )

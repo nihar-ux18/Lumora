@@ -1,41 +1,78 @@
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import HTTPException, UploadFile, status
+from fastapi import UploadFile
 
-UPLOAD_FOLDER = Path("uploads/avatars")
+from app.core.exceptions import ConflictError
 
-ALLOWED_TYPES = {
-    "image/jpeg",
-    "image/png",
-    "image/webp",
+
+AVATAR_DIR = Path("uploads/avatars")
+RESOURCE_DIR = Path("uploads/resources")
+
+IMAGE_EXTENSIONS = {
+    ".png",
+    ".jpg",
+    ".jpeg",
 }
 
-MAX_SIZE = 5 * 1024 * 1024  # 5 MB
+RESOURCE_EXTENSIONS = {
+    ".pdf",
+    ".docx",
+    ".png",
+    ".jpg",
+    ".jpeg",
+}
 
 
-async def save_avatar(file: UploadFile) -> str:
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only JPG, PNG and WEBP images are allowed.",
-        )
-
-    content = await file.read()
-
-    if len(content) > MAX_SIZE:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Image size must be less than 5 MB.",
-        )
-
+async def save_avatar(
+    file: UploadFile,
+) -> str:
     extension = Path(file.filename).suffix.lower()
+
+    if extension not in IMAGE_EXTENSIONS:
+        raise ConflictError(
+            "Unsupported avatar image type."
+        )
+
+    AVATAR_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     filename = f"{uuid4()}{extension}"
 
-    filepath = UPLOAD_FOLDER / filename
+    file_path = AVATAR_DIR / filename
 
-    with open(filepath, "wb") as f:
-        f.write(content)
+    contents = await file.read()
 
-    return f"/uploads/avatars/{filename}"
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
+    return str(file_path)
+
+
+async def save_resource_file(
+    file: UploadFile,
+) -> str:
+    extension = Path(file.filename).suffix.lower()
+
+    if extension not in RESOURCE_EXTENSIONS:
+        raise ConflictError(
+            "Unsupported file type."
+        )
+
+    RESOURCE_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    filename = f"{uuid4()}{extension}"
+
+    file_path = RESOURCE_DIR / filename
+
+    contents = await file.read()
+
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
+    return str(file_path)

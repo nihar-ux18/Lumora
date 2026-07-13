@@ -1,8 +1,8 @@
 from datetime import UTC, datetime, timedelta
 from secrets import token_urlsafe
 from fastapi import UploadFile
-from app.utils.file_upload import save_avatar
 
+from app.utils.file_upload import save_avatar
 from app.config.settings import settings
 from app.core.exceptions import (ConflictError, ResourceNotFoundError, UnauthorizedError)
 from app.core.logger import logger

@@ -1,4 +1,5 @@
 from uuid import UUID
+from fastapi import UploadFile
 
 from app.core.exceptions import (
     ForbiddenError,
@@ -14,6 +15,7 @@ from app.schemas.resource import (
 from app.services.workspace_member_service import (
     WorkspaceMemberService,
 )
+from app.utils.file_upload import save_resource_file
 
 
 class ResourceService:
@@ -129,5 +131,26 @@ class ResourceService:
             )
 
         await self.repository.delete(
+            resource,
+        )
+        
+    async def upload_resource_file(
+        self,
+        resource_id: UUID,
+        current_user: User,
+        file: UploadFile,
+    ) -> Resource:
+        resource = await self.get_resource(
+            resource_id,
+            current_user,
+        )
+
+        file_path = await save_resource_file(
+            file,
+        )
+
+        resource.file_path = file_path
+
+        return await self.repository.update(
             resource,
         )
