@@ -42,6 +42,36 @@ class WorkspaceMemberService:
             raise ForbiddenError("Only workspace owner can perform this action.")
 
         return workspace
+    
+    async def require_member(
+    self,
+    workspace_id: UUID,
+    user_id: UUID,
+):
+        workspace = await self.workspace_repository.get_by_id(
+            workspace_id,
+        )
+    
+        if workspace is None:
+            raise ResourceNotFoundError(
+                "Workspace not found."
+            )
+    
+        # Owner always has access
+        if workspace.owner_id == user_id:
+            return workspace
+    
+        member = await self.member_repository.get_member(
+            workspace_id,
+            user_id,
+        )
+    
+        if member is None:
+            raise ForbiddenError(
+                "You are not a member of this workspace."
+            )
+    
+        return workspace
         
     async def invite_user(
         self,workspace_id: UUID,
@@ -178,6 +208,8 @@ class WorkspaceMemberService:
             workspace_id,
             current_user_id,
         )
+        
+        
 
         member = await self.member_repository.get_member(
             workspace_id,

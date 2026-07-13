@@ -9,6 +9,8 @@ from app.repositories.workspace_repository import WorkspaceRepository
 from app.repositories.workspace_member_repository import WorkspaceMemberRepository
 from app.repositories.workspace_invitation_repository import WorkspaceInvitationRepository
 from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
+from app.repositories.resource_repository import ResourceRepository
+from app.services.resource_service import ResourceService
 from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
 from app.services.auth_service import AuthService
@@ -74,4 +76,29 @@ def get_workspace_member_service(
         member_repository=WorkspaceMemberRepository(db),
         invitation_repository=WorkspaceInvitationRepository(db),
         auth_repository=AuthRepository(db),
+    )
+    
+def get_resource_service(
+    db: AsyncSession = Depends(get_db),
+) -> ResourceService:
+    resource_repository = ResourceRepository(db)
+
+    workspace_repository = WorkspaceRepository(db)
+
+    member_repository = WorkspaceMemberRepository(db)
+
+    invitation_repository = WorkspaceInvitationRepository(db)
+
+    auth_repository = AuthRepository(db)
+
+    workspace_member_service = WorkspaceMemberService(
+        workspace_repository=workspace_repository,
+        member_repository=member_repository,
+        invitation_repository=invitation_repository,
+        auth_repository=auth_repository,
+    )
+
+    return ResourceService(
+        repository=resource_repository,
+        workspace_member_service=workspace_member_service,
     )
