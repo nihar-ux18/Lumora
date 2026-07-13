@@ -11,6 +11,7 @@ from app.repositories.workspace_repository import WorkspaceRepository
 from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
 from app.repositories.workspace_invitation_repository import (WorkspaceInvitationRepository,)
 from app.repositories.auth_repository import AuthRepository
+from app.models import user
 
 
 class WorkspaceMemberService:
@@ -86,6 +87,16 @@ class WorkspaceMemberService:
         if invitation.expires_at < datetime.now(UTC):
             raise ConflictError("Invitation expired.")
         
+        user = await self.auth_repository.get_user_by_id(current_user_id)
+
+        if not user:
+            raise ResourceNotFoundError("User not found.")
+
+        if invitation.email != user.email:
+            raise ForbiddenError(
+                "This invitation is not intended for your account."
+            )
+        
         existing_member = await self.member_repository.get_member(
         invitation.workspace_id,
         current_user_id,
@@ -109,3 +120,83 @@ class WorkspaceMemberService:
         await self.invitation_repository.update(invitation)
 
         return member
+
+    async def list_members(
+    self,
+    workspace_id: UUID,
+    current_user_id: UUID,
+    ):
+        await self.require_owner(
+            workspace_id,
+            current_user_id,
+        )
+
+        return await self.member_repository.list_members(
+            workspace_id,
+        )
+        
+    async def change_member_role(
+    self,
+    workspace_id: UUID,
+    current_user_id: UUID,
+    member_user_id: UUID,
+    role: WorkspaceRole,
+    ):
+        await self.require_owner(
+            workspace_id,
+            current_user_id,
+        )
+
+        member = await self.member_repository.get_member(
+            workspace_id,
+            member_user_id,
+        )
+
+        if not member:
+            raise ResourceNotFoundError(
+                "Member not found."
+            )
+
+        if member.role == WorkspaceRole.OWNER:
+            raise ForbiddenError(
+                "Owner role cannot be changed."
+            )
+
+        member.role = role
+
+        return await self.member_repository.update(
+            member
+        )
+        
+    async def remove_member(
+    self,
+    workspace_id: UUID,
+    current_user_id: UUID,
+    member_user_id: UUID,
+    ):
+        await self.require_owner(
+            workspace_id,
+            current_user_id,
+        )
+
+        member = await self.member_repository.get_member(
+            workspace_id,
+            member_user_id,
+        )
+
+        if not member:
+            raise ResourceNotFoundError(
+                "Member not found."
+            )
+
+        if member.role == WorkspaceRole.OWNER:
+            raise ForbiddenError(
+                "Workspace owner cannot be removed."
+            )
+
+        if member.user_id == current_user_id:
+            raise ForbiddenError(
+                "Owner cannot remove themselves."
+            )
+
+        await self.member_repository.delete(member)

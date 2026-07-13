@@ -3,6 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.models.workspace_member import WorkspaceRole
 
 class WorkspaceCreate(BaseModel):
     name: str = Field(min_length=2, max_length=255)
@@ -22,11 +23,16 @@ class WorkspaceUpdate(BaseModel):
         default=None,
         max_length=1000,
     )
+    
+class WorkspaceInvitationCreateRequest(BaseModel):
+    email: str
 
 
 class AcceptInvitationRequest(BaseModel):
     token: str
-
+    
+class WorkspaceMemberRoleUpdate(BaseModel):
+    role: WorkspaceRole
 
 class WorkspaceResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

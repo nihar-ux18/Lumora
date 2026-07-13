@@ -8,6 +8,7 @@ from app.repositories.auth_repository import AuthRepository
 from app.repositories.workspace_repository import WorkspaceRepository
 from app.repositories.workspace_member_repository import WorkspaceMemberRepository
 from app.repositories.workspace_invitation_repository import WorkspaceInvitationRepository
+from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
 from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
 from app.services.auth_service import AuthService
@@ -56,9 +57,13 @@ def require_admin():
     return require_roles(Role.ADMIN)
 
 def get_workspace_service(db: AsyncSession = Depends(get_db),) -> WorkspaceService:
-    repository = WorkspaceRepository(db)
+    workspace_repository = WorkspaceRepository(db)
+    workspace_member_repository = WorkspaceMemberRepository(db)
 
-    return WorkspaceService(repository)
+    return WorkspaceService(
+        repository=workspace_repository,
+        member_repository=workspace_member_repository,
+    )
 
 def get_workspace_member_service(
     db: AsyncSession = Depends(get_db),

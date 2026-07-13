@@ -3,6 +3,8 @@ from uuid import UUID
 from app.core.exceptions import ResourceNotFoundError
 from app.models.user import User
 from app.models.workspace import Workspace
+from app.models.workspace_member import (WorkspaceMember,WorkspaceRole,)
+from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
 from app.repositories.workspace_repository import WorkspaceRepository
 from app.schemas.workspace import (
     WorkspaceCreate,
@@ -14,8 +16,10 @@ class WorkspaceService:
     def __init__(
         self,
         repository: WorkspaceRepository,
+        member_repository: WorkspaceMemberRepository,
     ):
         self.repository = repository
+        self.member_repository = member_repository
 
     async def create_workspace(
         self,
@@ -27,8 +31,15 @@ class WorkspaceService:
             description=data.description,
             owner_id=owner.id,
         )
+        
+        workspace = await self.repository.create(workspace)
+        
+        owner_member = WorkspaceMember(
+        workspace_id=workspace.id,user_id=owner.id,role=WorkspaceRole.OWNER,)
+        
+        await self.member_repository.create(owner_member)
 
-        return await self.repository.create(workspace)
+        return workspace
 
     async def list_workspaces(
         self,
