@@ -5,6 +5,7 @@ from app.models.chat_message import (ChatMessage,MessageRole,)
 from app.models.chat_session import ChatSession
 from app.models.user import User
 from app.repositories.chat_repository import ChatRepository
+from app.repositories.resource_repository import ResourceRepository
 from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
 from app.repositories.workspace_repository import (WorkspaceRepository,)
 from app.schemas.chat import (ChatCreate,MessageCreate,)
@@ -16,11 +17,13 @@ class ChatService:
         chat_repository: ChatRepository,
         workspace_repository: WorkspaceRepository,
         member_repository: WorkspaceMemberRepository,
+        resource_repository: ResourceRepository,
         ai_service: AIService,
     ):
         self.chat_repository = chat_repository
         self.workspace_repository = workspace_repository
         self.member_repository = member_repository
+        self.resource_repository = resource_repository
         self.ai_service = ai_service
 
     async def require_workspace_member(
@@ -121,6 +124,56 @@ class ChatService:
         await self.chat_repository.delete_session(
             session,
         )
+        
+    async def build_workspace_context(
+        self,
+        workspace_id: UUID,
+    ) -> str:
+        resources = (
+            await self.resource_repository.list_by_workspace(
+                workspace_id,
+            )
+        )
+    
+        context = [
+            "You are Lumora AI.",
+            "",
+            "Answer ONLY using the workspace information below.",
+            "",
+            (
+                "If the answer cannot be found in the workspace, "
+                'reply exactly: "I couldn\'t find that information '
+                'in this workspace."'
+            ),
+            "",
+            "Workspace Resources:",
+            "",
+        ]
+    
+        if not resources:
+            context.append("No resources available.")
+    
+        for resource in resources:
+            context.append(f"Title: {resource.title}")
+    
+            if resource.description:
+                context.append(
+                    f"Description: {resource.description}"
+                )
+    
+            if resource.source_url:
+                context.append(
+                    f"URL: {resource.source_url}"
+                )
+    
+            if resource.file_path:
+                context.append(
+                    f"File: {resource.file_path}"
+                )
+    
+            context.append("--------------------")
+    
+        return "\n".join(context)
 
     async def add_message(
         self,
@@ -144,8 +197,15 @@ class ChatService:
             user_message,
         )
 
+        workspace_context = (
+    await self.build_workspace_context(
+        session.workspace_id,
+        )
+    )
+        
         # Generate AI response
         ai_response = await self.ai_service.generate_response(
+            workspace_context,
             data.content,
         )
 

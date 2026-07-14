@@ -12,6 +12,7 @@ from app.repositories.workspace_member_repository import (WorkspaceMemberReposit
 from app.repositories.email_verification_repository import (EmailVerificationRepository,)
 from app.repositories.resource_repository import ResourceRepository
 from app.repositories.chat_repository import ChatRepository
+from app.repositories.resource_repository import ResourceRepository
 from app.services.chat_service import ChatService
 from app.services.resource_service import ResourceService
 from app.services.workspace_member_service import WorkspaceMemberService
@@ -108,18 +109,20 @@ def get_resource_service(
     )
     
 def get_chat_service(
-    db: AsyncSession = Depends(get_db),
-    ) -> ChatService:
-        chat_repository = ChatRepository(db)
-        workspace_repository = WorkspaceRepository(db)
-        member_repository = WorkspaceMemberRepository(db)
-    
-        return ChatService(
-            chat_repository=chat_repository,
-            workspace_repository=workspace_repository,
-            member_repository=member_repository,
-            ai_service=get_ai_service(),
-        )
+    db: AsyncSession =Depends(get_db),
+) -> ChatService:
+    chat_repository = ChatRepository(db)
+    workspace_repository = WorkspaceRepository(db)
+    member_repository = WorkspaceMemberRepository(db)
+    resource_repository = ResourceRepository(db)
+
+    return ChatService(
+        chat_repository=chat_repository,
+        workspace_repository=workspace_repository,
+        member_repository=member_repository,
+        resource_repository=resource_repository,
+        ai_service=get_ai_service(),
+    )
         
 def get_ai_service() -> AIService:
     return AIService()

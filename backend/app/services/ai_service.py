@@ -12,16 +12,21 @@ class AIService:
 
     async def generate_response(
         self,
+        context: str,
         prompt: str,
     ) -> str:
         response = self.client.chat.completions.create(
             model=settings.groq_model,
             messages=[
                 {
+                    "role": "system",
+                    "content": context,
+                },
+                {
                     "role": "user",
                     "content": prompt,
-                }
+                },
             ],
         )
-
+    
         return response.choices[0].message.content
