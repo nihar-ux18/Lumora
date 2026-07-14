@@ -9,6 +9,7 @@ from app.repositories.workspace_repository import WorkspaceRepository
 from app.repositories.workspace_member_repository import WorkspaceMemberRepository
 from app.repositories.workspace_invitation_repository import WorkspaceInvitationRepository
 from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
+from app.repositories.email_verification_repository import (EmailVerificationRepository,)
 from app.repositories.resource_repository import ResourceRepository
 from app.repositories.chat_repository import ChatRepository
 from app.services.chat_service import ChatService
@@ -16,7 +17,7 @@ from app.services.resource_service import ResourceService
 from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
 from app.services.auth_service import AuthService
-from app.repositories.email_verification_repository import (EmailVerificationRepository,)
+from app.services.ai_service import AIService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -117,4 +118,8 @@ def get_chat_service(
             chat_repository=chat_repository,
             workspace_repository=workspace_repository,
             member_repository=member_repository,
+            ai_service=get_ai_service(),
         )
+        
+def get_ai_service() -> AIService:
+    return AIService()

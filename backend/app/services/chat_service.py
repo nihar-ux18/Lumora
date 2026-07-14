@@ -1,27 +1,14 @@
 from uuid import UUID
 
-from app.core.exceptions import (
-    ForbiddenError,
-    ResourceNotFoundError,
-)
-from app.models.chat_message import (
-    ChatMessage,
-    MessageRole,
-)
+from app.core.exceptions import (ForbiddenError,ResourceNotFoundError,)
+from app.models.chat_message import (ChatMessage,MessageRole,)
 from app.models.chat_session import ChatSession
 from app.models.user import User
 from app.repositories.chat_repository import ChatRepository
-from app.repositories.workspace_member_repository import (
-    WorkspaceMemberRepository,
-)
-from app.repositories.workspace_repository import (
-    WorkspaceRepository,
-)
-from app.schemas.chat import (
-    ChatCreate,
-    MessageCreate,
-)
-
+from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
+from app.repositories.workspace_repository import (WorkspaceRepository,)
+from app.schemas.chat import (ChatCreate,MessageCreate,)
+from app.services.ai_service import AIService
 
 class ChatService:
     def __init__(
@@ -29,10 +16,12 @@ class ChatService:
         chat_repository: ChatRepository,
         workspace_repository: WorkspaceRepository,
         member_repository: WorkspaceMemberRepository,
+        ai_service: AIService,
     ):
         self.chat_repository = chat_repository
         self.workspace_repository = workspace_repository
         self.member_repository = member_repository
+        self.ai_service = ai_service
 
     async def require_workspace_member(
         self,
@@ -138,21 +127,43 @@ class ChatService:
         chat_id: UUID,
         current_user: User,
         data: MessageCreate,
-    ) -> ChatMessage:
+    ):
         session = await self.get_chat(
             chat_id,
             current_user,
         )
 
-        message = ChatMessage(
+        # Save user's message
+        user_message = ChatMessage(
             chat_session_id=session.id,
             role=MessageRole.USER,
             content=data.content,
         )
 
-        return await self.chat_repository.create_message(
-            message,
+        user_message = await self.chat_repository.create_message(
+            user_message,
         )
+
+        # Generate AI response
+        ai_response = await self.ai_service.generate_response(
+            data.content,
+        )
+
+        # Save assistant message
+        assistant_message = ChatMessage(
+            chat_session_id=session.id,
+            role=MessageRole.ASSISTANT,
+            content=ai_response,
+        )
+
+        assistant_message = await self.chat_repository.create_message(
+            assistant_message,
+        )
+
+        return {
+            "user_message": user_message,
+            "assistant_message": assistant_message,
+        }
 
     async def list_messages(
         self,

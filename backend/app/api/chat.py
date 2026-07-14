@@ -2,17 +2,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.api.deps import (
-    get_chat_service,
-    get_current_user,
-)
+from app.api.deps import (get_chat_service,get_current_user,)
 from app.models.user import User
-from app.schemas.chat import (
-    ChatCreate,
-    ChatResponse,
-    MessageCreate,
-    MessageResponse,
-)
+from app.schemas.chat import (ChatCreate,ChatResponse,ChatReplyResponse,MessageCreate,MessageResponse,)
 from app.services.chat_service import ChatService
 
 router = APIRouter(
@@ -86,7 +78,7 @@ async def delete_chat(
 
 @router.post(
     "/{chat_id}/messages",
-    response_model=MessageResponse,
+    response_model=ChatReplyResponse,
 )
 async def add_message(
     chat_id: UUID,
