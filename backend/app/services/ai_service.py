@@ -14,19 +14,23 @@ class AIService:
         self,
         context: str,
         prompt: str,
+        history: list[dict],
     ) -> str:
+        messages = [
+            {
+                "role": "system",
+                "content": context,
+            },
+            *history,
+            {
+                "role": "user",
+                "content": prompt,
+            },
+        ]
+
         response = self.client.chat.completions.create(
             model=settings.groq_model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": context,
-                },
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
+            messages=messages,
         )
-    
+
         return response.choices[0].message.content

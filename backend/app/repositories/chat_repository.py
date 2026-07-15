@@ -87,3 +87,39 @@ class ChatRepository:
             .order_by(ChatMessage.created_at.asc())
         )
         return list(result.scalars().all())
+    
+    async def get_recent_messages(
+        self,
+        chat_session_id: UUID,
+        limit: int = 20,
+    ) -> list[ChatMessage]:
+        result = await self.db.execute(
+            select(ChatMessage)
+            .where(
+                ChatMessage.chat_session_id == chat_session_id,
+            )
+            .order_by(ChatMessage.created_at.asc())
+            .limit(limit)
+        )
+
+        return list(result.scalars().all())
+    
+    async def build_conversation_history(
+        self,
+        chat_session_id: UUID,
+    ) -> list[dict[str, str]]:
+        messages = await self.chat_repository.get_recent_messages(
+            chat_session_id,
+        )
+    
+        history = []
+    
+        for message in messages:
+            history.append(
+                {
+                    "role": message.role.value.lower(),
+                    "content": message.content,
+                }
+            )
+    
+        return history

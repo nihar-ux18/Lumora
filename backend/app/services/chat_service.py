@@ -175,6 +175,23 @@ class ChatService:
     
         return "\n".join(context)
 
+    async def build_conversation_history(
+        self,
+        chat_session_id: UUID,
+    ) -> list[dict]:
+        messages = await self.chat_repository.get_recent_messages(
+            chat_session_id,
+        )
+        history = []
+        for message in messages:
+            history.append(
+                {
+                    "role": message.role.value.lower(),
+                    "content": message.content,
+                }
+            )
+        return history
+        
     async def add_message(
         self,
         chat_id: UUID,
@@ -203,10 +220,13 @@ class ChatService:
         )
     )
         
+        history = await self.build_conversation_history(session.id,)
+        
         # Generate AI response
         ai_response = await self.ai_service.generate_response(
-            workspace_context,
-            data.content,
+            context=workspace_context,
+            prompt=data.content,
+            history=history,
         )
 
         # Save assistant message
