@@ -66,3 +66,9 @@ class Resource(Base, BaseModel):
         "User",
         back_populates="resources",
     )
+    
+    chunks = relationship(
+        "Chunk",
+        back_populates="resource",
+        cascade="all, delete-orphan",
+    )

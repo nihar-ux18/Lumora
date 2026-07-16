@@ -12,6 +12,7 @@ from app.repositories.workspace_member_repository import (WorkspaceMemberReposit
 from app.repositories.email_verification_repository import (EmailVerificationRepository,)
 from app.repositories.resource_repository import ResourceRepository
 from app.repositories.chat_repository import ChatRepository
+from app.repositories.chunk_repository import ChunkRepository
 from app.repositories.resource_repository import ResourceRepository
 from app.services.chat_service import ChatService
 from app.services.resource_service import ResourceService
@@ -22,6 +23,8 @@ from app.services.auth_service import AuthService
 from app.services.chunking_service import ChunkingService
 from app.services.embedding_service import EmbeddingService
 from app.services.ai_service import AIService
+from app.services.chunking_service import ChunkingService
+from app.services.embedding_service import EmbeddingService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -91,6 +94,8 @@ def get_resource_service(
 ) -> ResourceService:
     resource_repository = ResourceRepository(db)
 
+    chunk_repository = ChunkRepository(db)
+    
     workspace_repository = WorkspaceRepository(db)
 
     member_repository = WorkspaceMemberRepository(db)
@@ -108,6 +113,7 @@ def get_resource_service(
 
     return ResourceService(
         repository=resource_repository,
+        chunk_repository=chunk_repository,
         workspace_member_service=workspace_member_service,
         parser_service=ParserService(),
         chunking_service=ChunkingService(),

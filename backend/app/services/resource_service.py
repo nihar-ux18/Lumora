@@ -11,20 +11,24 @@ from app.services.embedding_service import EmbeddingService
 from app.services.parser_service import ParserService
 from app.services.chunking_service import ChunkingService
 from app.utils.file_upload import save_resource_file
-
+from app.models.chunk import Chunk
+from app.repositories.chunk_repository import ChunkRepository
+from app.models.chunk import Chunk
 
 class ResourceService:
     def __init__(
         self,
         repository: ResourceRepository,
+        chunk_repository: ChunkRepository,
         workspace_member_service: WorkspaceMemberService,
         parser_service: ParserService,
         chunking_service: ChunkingService,
         embedding_service: EmbeddingService,
     ):
         self.repository = repository
-        self.workspace_member_service = workspace_member_service
+        self.chunk_repository = chunk_repository
         self.parser_service = parser_service
+        self.workspace_member_service = workspace_member_service
         self.chunking_service = chunking_service
         self.embedding_service = embedding_service
 
@@ -162,12 +166,18 @@ class ResourceService:
         embeddings = self.embedding_service.generate_embeddings(
             chunks,
         )
-    
-        print("=" * 50)
-        print(f"Total Chunks: {len(chunks)}")
-        print(f"Generated Embeddings: {len(embeddings)}")
-        print(f"Embedding Dimension: {len(embeddings[0])}")
-        print("=" * 50)
+        
+        for index, (chunk_text, embedding) in enumerate(
+            zip(chunks, embeddings)
+        ):
+            chunk = Chunk(
+                resource_id=resource.id,
+                chunk_index=index,
+                content=chunk_text,
+                embedding=embedding,
+            )
+        
+            await self.chunk_repository.create(chunk)
     
         updated = await self.repository.update(
             resource,

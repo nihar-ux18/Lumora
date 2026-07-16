@@ -56,9 +56,13 @@ async def save_avatar(
 async def save_resource_file(
     file: UploadFile,
 ) -> str:
-    print("=" * 50)
 
     extension = Path(file.filename).suffix.lower()
+    
+    if extension not in RESOURCE_EXTENSIONS:
+        raise ConflictError(
+            "Unsupported file type."
+        )
 
     RESOURCE_DIR.mkdir(
         parents=True,

@@ -7,5 +7,6 @@ from app.models.password_reset import PasswordResetToken
 from app.models.resource import Resource
 from app.models.chat_message import ChatMessage
 from app.models.chat_session import ChatSession
+from app.models.chunk import Chunk
 
-__all__ = ["User", "Workspace", "WorkspaceMember", "WorkspaceInvitation", "EmailVerificationToken", "PasswordResetToken", "Resource", "ChatMessage", "ChatSession"]
+__all__ = ["User", "Workspace", "WorkspaceMember", "WorkspaceInvitation", "EmailVerificationToken", "PasswordResetToken", "Resource", "ChatMessage", "ChatSession", "Chunk"]
