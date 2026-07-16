@@ -25,6 +25,7 @@ dependencies = [
     "python-jose>=3.5.0",
     "python-multipart>=0.0.32",
     "redis>=8.0.1",
+    "sentence-transformers>=5.6.0",
     "sqlalchemy>=2.0.51",
     "structlog>=26.1.0",
     "uvicorn>=0.51.0",
