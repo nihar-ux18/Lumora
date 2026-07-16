@@ -1,20 +1,13 @@
 from uuid import UUID
 from fastapi import UploadFile
 
-from app.core.exceptions import (
-    ForbiddenError,
-    ResourceNotFoundError,
-)
+from app.core.exceptions import (ForbiddenError,ResourceNotFoundError,)
 from app.models.resource import Resource
 from app.models.user import User
 from app.repositories.resource_repository import ResourceRepository
-from app.schemas.resource import (
-    ResourceCreate,
-    ResourceUpdate,
-)
-from app.services.workspace_member_service import (
-    WorkspaceMemberService,
-)
+from app.schemas.resource import (ResourceCreate,ResourceUpdate,)
+from app.services.workspace_member_service import (WorkspaceMemberService,)
+from app.services.parser_service import ParserService
 from app.utils.file_upload import save_resource_file
 
 
@@ -23,9 +16,11 @@ class ResourceService:
         self,
         repository: ResourceRepository,
         workspace_member_service: WorkspaceMemberService,
+        parser_service: ParserService,
     ):
         self.repository = repository
         self.workspace_member_service = workspace_member_service
+        self.parser_service = parser_service
 
     async def create_resource(
         self,
@@ -140,17 +135,20 @@ class ResourceService:
         current_user: User,
         file: UploadFile,
     ) -> Resource:
+    
         resource = await self.get_resource(
             resource_id,
             current_user,
         )
-
-        file_path = await save_resource_file(
-            file,
-        )
-
+    
+        file_path = await save_resource_file(file)
+    
         resource.file_path = file_path
+    
+        extracted_text = await self.parser_service.extract_text(file_path)
 
-        return await self.repository.update(
-            resource,
-        )
+        print("repr(extracted_text):", repr(extracted_text))
+    
+        updated = await self.repository.update(resource)
+    
+        return updated

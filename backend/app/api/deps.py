@@ -16,6 +16,7 @@ from app.repositories.resource_repository import ResourceRepository
 from app.services.chat_service import ChatService
 from app.services.resource_service import ResourceService
 from app.services.workspace_member_service import WorkspaceMemberService
+from app.services.parser_service import ParserService
 from app.services.workspace_service import WorkspaceService
 from app.services.auth_service import AuthService
 from app.services.ai_service import AIService
@@ -106,6 +107,7 @@ def get_resource_service(
     return ResourceService(
         repository=resource_repository,
         workspace_member_service=workspace_member_service,
+        parser_service=ParserService(),
     )
     
 def get_chat_service(

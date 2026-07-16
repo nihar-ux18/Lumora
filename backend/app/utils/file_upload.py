@@ -17,6 +17,8 @@ IMAGE_EXTENSIONS = {
 
 RESOURCE_EXTENSIONS = {
     ".pdf",
+    ".txt",
+    ".md",
     ".docx",
     ".png",
     ".jpg",
@@ -54,12 +56,9 @@ async def save_avatar(
 async def save_resource_file(
     file: UploadFile,
 ) -> str:
-    extension = Path(file.filename).suffix.lower()
+    print("=" * 50)
 
-    if extension not in RESOURCE_EXTENSIONS:
-        raise ConflictError(
-            "Unsupported file type."
-        )
+    extension = Path(file.filename).suffix.lower()
 
     RESOURCE_DIR.mkdir(
         parents=True,
@@ -67,7 +66,6 @@ async def save_resource_file(
     )
 
     filename = f"{uuid4()}{extension}"
-
     file_path = RESOURCE_DIR / filename
 
     contents = await file.read()
