@@ -19,6 +19,7 @@ from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.parser_service import ParserService
 from app.services.workspace_service import WorkspaceService
 from app.services.auth_service import AuthService
+from app.services.chunking_service import ChunkingService
 from app.services.ai_service import AIService
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -108,6 +109,7 @@ def get_resource_service(
         repository=resource_repository,
         workspace_member_service=workspace_member_service,
         parser_service=ParserService(),
+        chunking_service=ChunkingService(),
     )
     
 def get_chat_service(
