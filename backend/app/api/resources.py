@@ -1,23 +1,12 @@
 from uuid import UUID
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    File,
-    UploadFile,
-)
+from fastapi import (APIRouter,Depends,File,UploadFile,)
 
-from app.api.deps import (
-    get_current_user,
-    get_resource_service,
-)
+from app.api.deps import (get_current_user,get_resource_service,)
 from app.models.user import User
-from app.schemas.resource import (
-    ResourceCreate,
-    ResourceResponse,
-    ResourceUpdate,
-)
+from app.schemas.resource import (ResourceCreate,ResourceResponse,ResourceUpdate,)
 from app.services.resource_service import ResourceService
+from app.schemas.chunk import SearchQuery
 
 router = APIRouter(
     tags=["Resources"],
@@ -122,3 +111,31 @@ async def upload_resource(
         current_user=current_user,
         file=file,
     )
+    
+@router.post(
+    "/workspaces/{workspace_id}/resources/search",
+)
+async def semantic_search(
+    workspace_id: UUID,
+    data: SearchQuery,
+    current_user: User = Depends(
+        get_current_user,
+    ),
+    service: ResourceService = Depends(
+        get_resource_service,
+    ),
+):
+    results = await service.semantic_search(
+        workspace_id=workspace_id,
+        query=data.query,
+        limit=data.limit,
+        current_user=current_user,
+    )
+
+    return [
+        {
+            "chunk_index": chunk.chunk_index,
+            "content": chunk.content,
+        }
+        for chunk in results
+    ]

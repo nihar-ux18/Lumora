@@ -13,7 +13,6 @@ from app.services.chunking_service import ChunkingService
 from app.utils.file_upload import save_resource_file
 from app.models.chunk import Chunk
 from app.repositories.chunk_repository import ChunkRepository
-from app.models.chunk import Chunk
 
 class ResourceService:
     def __init__(
@@ -184,3 +183,26 @@ class ResourceService:
         )
     
         return updated
+    
+    async def semantic_search(
+        self,
+        workspace_id: UUID,
+        current_user: User,
+        query: str,
+        limit: int = 5,
+    ) -> list[Chunk]:
+        
+        await self.workspace_member_service.require_member(
+            workspace_id,
+            current_user.id,
+        )
+
+        query_embedding = self.embedding_service.generate_embeddings(
+            [query]
+        )[0]
+
+        return await self.chunk_repository.semantic_search(
+            workspace_id=workspace_id,
+            query_embedding=query_embedding,
+            limit=limit,
+        )
