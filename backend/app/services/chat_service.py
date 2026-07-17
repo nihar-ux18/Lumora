@@ -1,15 +1,31 @@
 from uuid import UUID
 
-from app.core.exceptions import (ForbiddenError,ResourceNotFoundError,)
-from app.models.chat_message import (ChatMessage,MessageRole,)
+from app.core.exceptions import (
+    ForbiddenError,
+    ResourceNotFoundError,
+)
+from app.models.chat_message import (
+    ChatMessage,
+    MessageRole,
+)
 from app.models.chat_session import ChatSession
 from app.models.user import User
 from app.repositories.chat_repository import ChatRepository
+from app.repositories.chunk_repository import ChunkRepository
 from app.repositories.resource_repository import ResourceRepository
-from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
-from app.repositories.workspace_repository import (WorkspaceRepository,)
-from app.schemas.chat import (ChatCreate,MessageCreate,)
+from app.repositories.workspace_member_repository import (
+    WorkspaceMemberRepository,
+)
+from app.repositories.workspace_repository import (
+    WorkspaceRepository,
+)
+from app.schemas.chat import (
+    ChatCreate,
+    MessageCreate,
+)
 from app.services.ai_service import AIService
+from app.services.embedding_service import EmbeddingService
+
 
 class ChatService:
     def __init__(
@@ -18,12 +34,16 @@ class ChatService:
         workspace_repository: WorkspaceRepository,
         member_repository: WorkspaceMemberRepository,
         resource_repository: ResourceRepository,
+        chunk_repository: ChunkRepository,
+        embedding_service: EmbeddingService,
         ai_service: AIService,
     ):
         self.chat_repository = chat_repository
         self.workspace_repository = workspace_repository
         self.member_repository = member_repository
         self.resource_repository = resource_repository
+        self.chunk_repository = chunk_repository
+        self.embedding_service = embedding_service
         self.ai_service = ai_service
 
     async def require_workspace_member(
@@ -32,12 +52,12 @@ class ChatService:
         user_id: UUID,
     ):
         workspace = await self.workspace_repository.get_by_id(
-            workspace_id
+            workspace_id,
         )
 
         if workspace is None:
             raise ResourceNotFoundError(
-                "Workspace not found."
+                "Workspace not found.",
             )
 
         if workspace.owner_id == user_id:
@@ -50,7 +70,7 @@ class ChatService:
 
         if member is None:
             raise ForbiddenError(
-                "You are not a member of this workspace."
+                "You are not a member of this workspace.",
             )
 
         return workspace
@@ -101,7 +121,7 @@ class ChatService:
 
         if session is None:
             raise ResourceNotFoundError(
-                "Chat not found."
+                "Chat not found.",
             )
 
         await self.require_workspace_member(
@@ -124,56 +144,29 @@ class ChatService:
         await self.chat_repository.delete_session(
             session,
         )
-        
-    async def build_workspace_context(
+
+    async def build_rag_context(
         self,
         workspace_id: UUID,
+        query: str,
     ) -> str:
-        resources = (
-            await self.resource_repository.list_by_workspace(
-                workspace_id,
-            )
+        query_embedding = self.embedding_service.generate_embeddings(
+            [query],
+        )[0]
+
+        chunks = await self.chunk_repository.semantic_search(
+            workspace_id=workspace_id,
+            query_embedding=query_embedding,
+            limit=5,
         )
-    
-        context = [
-            "You are Lumora AI.",
-            "",
-            "Answer ONLY using the workspace information below.",
-            "",
-            (
-                "If the answer cannot be found in the workspace, "
-                'reply exactly: "I couldn\'t find that information '
-                'in this workspace."'
-            ),
-            "",
-            "Workspace Resources:",
-            "",
-        ]
-    
-        if not resources:
-            context.append("No resources available.")
-    
-        for resource in resources:
-            context.append(f"Title: {resource.title}")
-    
-            if resource.description:
-                context.append(
-                    f"Description: {resource.description}"
-                )
-    
-            if resource.source_url:
-                context.append(
-                    f"URL: {resource.source_url}"
-                )
-    
-            if resource.file_path:
-                context.append(
-                    f"File: {resource.file_path}"
-                )
-    
-            context.append("--------------------")
-    
-        return "\n".join(context)
+
+        if not chunks:
+            return "No relevant context found."
+
+        return "\n\n".join(
+            chunk.content
+            for chunk in chunks
+        )
 
     async def build_conversation_history(
         self,
@@ -182,7 +175,9 @@ class ChatService:
         messages = await self.chat_repository.get_recent_messages(
             chat_session_id,
         )
+
         history = []
+
         for message in messages:
             history.append(
                 {
@@ -190,8 +185,9 @@ class ChatService:
                     "content": message.content,
                 }
             )
+
         return history
-        
+
     async def add_message(
         self,
         chat_id: UUID,
@@ -202,8 +198,11 @@ class ChatService:
             chat_id,
             current_user,
         )
+        
+        history = await self.build_conversation_history(
+            session.id,
+        )
 
-        # Save user's message
         user_message = ChatMessage(
             chat_session_id=session.id,
             role=MessageRole.USER,
@@ -214,22 +213,17 @@ class ChatService:
             user_message,
         )
 
-        workspace_context = (
-    await self.build_workspace_context(
-        session.workspace_id,
+        rag_context = await self.build_rag_context(
+            workspace_id=session.workspace_id,
+            query=data.content,
         )
-    )
-        
-        history = await self.build_conversation_history(session.id,)
-        
-        # Generate AI response
+
         ai_response = await self.ai_service.generate_response(
-            context=workspace_context,
+            context=rag_context,
             prompt=data.content,
             history=history,
         )
 
-        # Save assistant message
         assistant_message = ChatMessage(
             chat_session_id=session.id,
             role=MessageRole.ASSISTANT,

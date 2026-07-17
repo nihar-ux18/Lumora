@@ -16,10 +16,25 @@ class AIService:
         prompt: str,
         history: list[dict],
     ) -> str:
+    
+        system_prompt = f"""
+    You are Lumora AI.
+    
+    Answer ONLY using the context below.
+    
+    If the answer cannot be found in the context, reply exactly:
+    
+    "I couldn't find that information in this workspace."
+    
+    Context:
+    
+    {context}
+    """
+    
         messages = [
             {
                 "role": "system",
-                "content": context,
+                "content": system_prompt,
             },
             *history,
             {
@@ -27,10 +42,10 @@ class AIService:
                 "content": prompt,
             },
         ]
-
+    
         response = self.client.chat.completions.create(
             model=settings.groq_model,
             messages=messages,
         )
-
+    
         return response.choices[0].message.content
