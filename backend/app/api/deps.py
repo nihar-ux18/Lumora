@@ -22,6 +22,8 @@ from app.services.auth_service import AuthService
 from app.services.chunking_service import ChunkingService
 from app.services.embedding_service import EmbeddingService
 from app.services.ai_service import AIService
+from app.services.quiz_service import QuizService
+from app.schemas.quiz import QuizResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -135,6 +137,17 @@ def get_chat_service(
         embedding_service=EmbeddingService(),
         ai_service=get_ai_service(),
     )
-        
+    
+def get_quiz_service(
+        db: AsyncSession = Depends(get_db),
+    ) -> QuizService:
+        return QuizService(
+            workspace_repository=WorkspaceRepository(db),
+            member_repository=WorkspaceMemberRepository(db),
+            chunk_repository=ChunkRepository(db),
+            embedding_service=EmbeddingService(),
+            ai_service=get_ai_service(),
+        )
+    
 def get_ai_service() -> AIService:
     return AIService()

@@ -1,4 +1,5 @@
 from openai import OpenAI
+import json
 
 from app.config.settings import settings
 
@@ -65,3 +66,74 @@ Retrieved Context:
         )
 
         return response.choices[0].message.content
+    
+    async def generate_quiz(
+        self,
+        context: str,
+        topic: str,
+        num_questions: int,
+    ):
+        prompt = f"""
+    Generate exactly {num_questions} multiple-choice questions.
+
+    Topic:
+    {topic}
+
+    Context:
+    {context}
+
+    Return ONLY valid JSON.
+
+    Format:
+
+    {{
+    "questions": [
+        {{
+        "question": "...",
+        "options": [
+            "...",
+            "...",
+            "...",
+            "..."
+        ],
+        "correct_answer": 0,
+        "explanation": "..."
+        }}
+    ]
+    }}
+
+    Rules:
+
+    - Exactly 4 options.
+    - correct_answer is the option index (0-3).
+    - Use ONLY the provided context.
+    - If the context doesn't contain enough information, return:
+
+    {{
+    "questions":[]
+    }}
+
+    Do NOT wrap the JSON inside markdown.
+    Do NOT explain anything.
+    """
+
+        response = self.client.chat.completions.create(
+            model=settings.groq_model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You generate educational quizzes "
+                        "using only the provided context."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": prompt,
+                },
+            ],
+        )
+
+        content = response.choices[0].message.content
+
+        return json.loads(content)
