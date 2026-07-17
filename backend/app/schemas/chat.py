@@ -48,6 +48,13 @@ class MessageResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     
+    
+class ChatSource(BaseModel):
+    resource_title: str
+    chunk_index: int
+    
+    
 class ChatReplyResponse(BaseModel):
     user_message: MessageResponse
     assistant_message: MessageResponse
+    sources: list[ChatSource]

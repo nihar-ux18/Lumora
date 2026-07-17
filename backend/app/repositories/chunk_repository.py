@@ -2,6 +2,7 @@ from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.models.chunk import Chunk
 from app.models.resource import Resource
@@ -44,6 +45,9 @@ class ChunkRepository:
 
         statement = (
             select(Chunk)
+            .options(
+                selectinload(Chunk.resource),
+            )
             .join(
                 Resource,
                 Chunk.resource_id == Resource.id,
@@ -63,4 +67,6 @@ class ChunkRepository:
             statement,
         )
 
-        return list(result.scalars().all())
+        return list(
+            result.scalars().all()
+        )
