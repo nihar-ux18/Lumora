@@ -9,16 +9,10 @@ from app.models.user import Role
 from app.repositories.auth_repository import AuthRepository
 from app.repositories.chat_repository import ChatRepository
 from app.repositories.chunk_repository import ChunkRepository
-from app.repositories.email_verification_repository import (
-    EmailVerificationRepository,
-)
+from app.repositories.email_verification_repository import (EmailVerificationRepository,)
 from app.repositories.resource_repository import ResourceRepository
-from app.repositories.workspace_invitation_repository import (
-    WorkspaceInvitationRepository,
-)
-from app.repositories.workspace_member_repository import (
-    WorkspaceMemberRepository,
-)
+from app.repositories.workspace_invitation_repository import (WorkspaceInvitationRepository,)
+from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
 from app.repositories.workspace_repository import WorkspaceRepository
 
 from app.services.ai_service import AIService
@@ -33,6 +27,8 @@ from app.services.resource_service import ResourceService
 from app.services.summary_service import SummaryService
 from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
+from app.services.revision_service import RevisionService
+from app.schemas.revision import RevisionResponse
 
 
 # -------------------------------
@@ -218,3 +214,19 @@ def get_summary_service(
         embedding_service=get_embedding_service(),
         ai_service=ai_service,
     )
+    
+# -------------------------------
+# Revision
+# -------------------------------
+    
+def get_revision_service(
+    db: AsyncSession = Depends(get_db),
+) -> RevisionService:
+    return RevisionService(
+        workspace_repository=WorkspaceRepository(db),
+        member_repository=WorkspaceMemberRepository(db),
+        chunk_repository=ChunkRepository(db),
+        embedding_service=EmbeddingService(),
+        ai_service=get_ai_service(),
+    )
+    
