@@ -25,3 +25,22 @@ class QuizQuestion(BaseModel):
 
 class QuizResponse(BaseModel):
     questions: list[QuizQuestion]
+    
+class QuizSubmissionRequest(BaseModel):
+    questions: list[QuizQuestion]
+    answers: list[int]
+
+
+class QuizResult(BaseModel):
+    question: str
+    selected_answer: int
+    correct_answer: int
+    is_correct: bool
+    explanation: str
+
+
+class QuizSubmissionResponse(BaseModel):
+    score: int
+    total_questions: int
+    percentage: float
+    results: list[QuizResult]

@@ -1,13 +1,13 @@
 from uuid import UUID
 
 from app.repositories.chunk_repository import ChunkRepository
-from app.schemas.quiz import QuizResponse
+from app.schemas.quiz import (QuizGenerateRequest,QuizQuestion,QuizResponse,QuizSubmissionRequest,QuizSubmissionResponse,QuizResult,)
 from app.services.ai_service import AIService
 from app.services.embedding_service import EmbeddingService
 from app.core.exceptions import (ForbiddenError,ResourceNotFoundError,)
 from app.models.user import User
 from app.repositories.workspace_repository import WorkspaceRepository
-from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
+from app.repositories.workspace_member_repository import WorkspaceMemberRepository
 
 
 class QuizService:
@@ -81,3 +81,74 @@ class QuizService:
         )
 
         return QuizResponse(**result)
+    
+    async def submit_quiz(
+        self,
+        submission: QuizSubmissionRequest,
+    ) -> QuizSubmissionResponse:
+        if len(submission.questions) != len(submission.answers):
+            raise ValueError(
+                "Number of answers must match number of questions."
+            )
+
+        score = 0
+        results = []
+
+        for question, selected in zip(
+            submission.questions,
+            submission.answers,
+        ):
+            is_correct = (
+                selected == question.correct_answer
+            )
+
+            if is_correct:
+                score += 1
+
+            results.append(
+                QuizResult(
+                    question=question.question,
+                    selected_answer=selected,
+                    correct_answer=question.correct_answer,
+                    is_correct=is_correct,
+                    explanation=question.explanation,
+                )
+            )
+
+        percentage = round((score / len(submission.questions)) * 100,2)
+
+        return QuizSubmissionResponse(
+            score=score,
+            total_questions=len(submission.questions),
+            percentage=percentage,
+            results=results,
+        )
+        
+    async def require_workspace_member(
+        self,
+        workspace_id: UUID,
+        user_id: UUID,
+    ):
+        workspace = await self.workspace_repository.get_by_id(
+            workspace_id,
+        )
+
+        if workspace is None:
+            raise ResourceNotFoundError(
+                "Workspace not found.",
+            )
+
+        if workspace.owner_id == user_id:
+            return workspace
+
+        member = await self.member_repository.get_member(
+            workspace_id,
+            user_id,
+        )
+
+        if member is None:
+            raise ForbiddenError(
+                "You are not a member of this workspace.",
+            )
+
+        return workspace
