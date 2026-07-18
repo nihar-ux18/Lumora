@@ -29,6 +29,8 @@ from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
 from app.services.revision_service import RevisionService
 from app.schemas.revision import RevisionResponse
+from app.services.roadmap_service import RoadmapService
+from app.schemas.roadmap import RoadmapResponse
 
 
 # -------------------------------
@@ -230,3 +232,17 @@ def get_revision_service(
         ai_service=get_ai_service(),
     )
     
+    
+# -------------------------------
+# Roadmap
+# -------------------------------
+def get_roadmap_service(
+    db: AsyncSession = Depends(get_db),
+) -> RoadmapService:
+    return RoadmapService(
+        workspace_repository=WorkspaceRepository(db),
+        member_repository=WorkspaceMemberRepository(db),
+        chunk_repository=ChunkRepository(db),
+        embedding_service=EmbeddingService(),
+        ai_service=AIService(),
+    )

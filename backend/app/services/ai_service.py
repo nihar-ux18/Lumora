@@ -1,17 +1,6 @@
-from openai import OpenAI
 import json
 
-from app.config.settings import settings
-
-
-class AIService:
-    def __init__(self):
-        self.client = OpenAI(
-            api_key=settings.groq_api_key,
-            base_url="https://api.groq.com/openai/v1",
-        )
-
-    from openai import OpenAI
+from openai import OpenAI
 
 from app.config.settings import settings
 
@@ -66,7 +55,7 @@ Retrieved Context:
         )
 
         return response.choices[0].message.content
-    
+
     async def generate_quiz(
         self,
         context: str,
@@ -74,48 +63,47 @@ Retrieved Context:
         num_questions: int,
     ):
         prompt = f"""
-    Generate exactly {num_questions} multiple-choice questions.
+Generate exactly {num_questions} multiple-choice questions.
 
-    Topic:
-    {topic}
+Topic:
+{topic}
 
-    Context:
-    {context}
+Context:
+{context}
 
-    Return ONLY valid JSON.
+Return ONLY valid JSON.
 
-    Format:
+Format:
 
+{{
+  "questions": [
     {{
-    "questions": [
-        {{
-        "question": "...",
-        "options": [
-            "...",
-            "...",
-            "...",
-            "..."
-        ],
-        "correct_answer": 0,
-        "explanation": "..."
-        }}
-    ]
+      "question": "...",
+      "options": [
+        "...",
+        "...",
+        "...",
+        "..."
+      ],
+      "correct_answer": 0,
+      "explanation": "..."
     }}
+  ]
+}}
 
-    Rules:
+Rules:
+- Exactly 4 options.
+- correct_answer is the option index (0-3).
+- Use ONLY the provided context.
+- If the context doesn't contain enough information, return:
 
-    - Exactly 4 options.
-    - correct_answer is the option index (0-3).
-    - Use ONLY the provided context.
-    - If the context doesn't contain enough information, return:
+{{
+  "questions": []
+}}
 
-    {{
-    "questions":[]
-    }}
-
-    Do NOT wrap the JSON inside markdown.
-    Do NOT explain anything.
-    """
+Do NOT wrap the JSON inside markdown.
+Do NOT explain anything.
+"""
 
         response = self.client.chat.completions.create(
             model=settings.groq_model,
@@ -134,15 +122,27 @@ Retrieved Context:
             ],
         )
 
-        content = response.choices[0].message.content
+        content = response.choices[0].message.content.strip()
+
+        content = content.replace("```json", "")
+        content = content.replace("```", "").strip()
+
+        start = content.find("{")
+        end = content.rfind("}")
+
+        if start == -1 or end == -1:
+            raise ValueError(f"Model did not return valid JSON:\n{content}")
+
+        content = content[start:end + 1]
 
         return json.loads(content)
-    
+
     async def generate_json(
         self,
         system_prompt: str,
         user_prompt: str,
-    ):
+    ) -> dict:
+
         response = self.client.chat.completions.create(
             model=settings.groq_model,
             messages=[
@@ -155,12 +155,28 @@ Retrieved Context:
                     "content": user_prompt,
                 },
             ],
+            temperature=0.2,
         )
-    
-        return json.loads(
-            response.choices[0].message.content
-        )
-        
+
+        content = response.choices[0].message.content.strip()
+
+        print("\n========== AI RESPONSE ==========")
+        print(content)
+        print("=================================\n")
+
+        content = content.replace("```json", "")
+        content = content.replace("```", "").strip()
+
+        start = content.find("{")
+        end = content.rfind("}")
+
+        if start == -1 or end == -1:
+            raise ValueError(f"Model did not return valid JSON:\n{content}")
+
+        content = content[start:end + 1]
+
+        return json.loads(content)
+
     async def generate_summary(
         self,
         context: str,
@@ -174,30 +190,30 @@ Retrieved Context:
                 "Return ONLY valid JSON."
             ),
             user_prompt=f"""
-    Generate a concise summary.
-    
-    Topic:
-    {topic}
-    
-    Context:
-    {context}
-    
-    Return JSON:
-    
-    {{
-      "summary": "..."
-    }}
-    
-    Rules:
-    - Use ONLY the provided context.
-    - Keep the summary concise and factual.
-    - If the context does not contain enough information about the requested topic, return:
-    
-    {{
-      "summary": "I couldn't find enough information in this workspace."
-    }}
-    
-    - Do not wrap JSON in markdown.
-    - Do not explain anything.
-    """,
+Generate a concise summary.
+
+Topic:
+{topic}
+
+Context:
+{context}
+
+Return JSON:
+
+{{
+  "summary": "..."
+}}
+
+Rules:
+- Use ONLY the provided context.
+- Keep the summary concise and factual.
+- If the context does not contain enough information about the requested topic, return:
+
+{{
+  "summary": "I couldn't find enough information in this workspace."
+}}
+
+- Do not wrap JSON in markdown.
+- Do not explain anything.
+""",
         )
