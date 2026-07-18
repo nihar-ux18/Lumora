@@ -1,56 +1,91 @@
 from fastapi import Depends
-
 from fastapi import HTTPException, status
-from app.models.user import Role
-from app.core.security import oauth2_scheme
-from app.db.session import get_db
-from app.repositories.auth_repository import AuthRepository
-from app.repositories.workspace_repository import WorkspaceRepository
-from app.repositories.workspace_member_repository import WorkspaceMemberRepository
-from app.repositories.workspace_invitation_repository import WorkspaceInvitationRepository
-from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
-from app.repositories.email_verification_repository import (EmailVerificationRepository,)
-from app.repositories.resource_repository import ResourceRepository
-from app.repositories.chat_repository import ChatRepository
-from app.repositories.chunk_repository import ChunkRepository
-from app.services.chat_service import ChatService
-from app.services.flashcard_service import FlashcardService
-from app.services.resource_service import ResourceService
-from app.services.workspace_member_service import WorkspaceMemberService
-from app.services.parser_service import ParserService
-from app.services.workspace_service import WorkspaceService
-from app.services.auth_service import AuthService
-from app.services.chunking_service import ChunkingService
-from app.services.embedding_service import EmbeddingService
-from app.services.ai_service import AIService
-from app.services.quiz_service import QuizService
-from app.schemas.quiz import QuizResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.security import oauth2_scheme
+from app.db.session import get_db
+from app.models.user import Role
+
+from app.repositories.auth_repository import AuthRepository
+from app.repositories.chat_repository import ChatRepository
+from app.repositories.chunk_repository import ChunkRepository
+from app.repositories.email_verification_repository import (
+    EmailVerificationRepository,
+)
+from app.repositories.resource_repository import ResourceRepository
+from app.repositories.workspace_invitation_repository import (
+    WorkspaceInvitationRepository,
+)
+from app.repositories.workspace_member_repository import (
+    WorkspaceMemberRepository,
+)
+from app.repositories.workspace_repository import WorkspaceRepository
+
+from app.services.ai_service import AIService
+from app.services.auth_service import AuthService
+from app.services.chat_service import ChatService
+from app.services.chunking_service import ChunkingService
+from app.services.embedding_service import EmbeddingService
+from app.services.flashcard_service import FlashcardService
+from app.services.parser_service import ParserService
+from app.services.quiz_service import QuizService
+from app.services.resource_service import ResourceService
+from app.services.summary_service import SummaryService
+from app.services.workspace_member_service import WorkspaceMemberService
+from app.services.workspace_service import WorkspaceService
 
 
-def get_auth_service(db: AsyncSession = Depends(get_db),) -> AuthService:
-    auth_repository = AuthRepository(db)
-    email_repository = EmailVerificationRepository(db)
+# -------------------------------
+# Singletons
+# -------------------------------
 
+ai_service = AIService()
+
+_embedding_service = None
+ai_service = AIService()
+
+
+def get_embedding_service() -> EmbeddingService:
+    global _embedding_service
+
+    if _embedding_service is None:
+        _embedding_service = EmbeddingService()
+
+    return _embedding_service
+
+
+def get_ai_service() -> AIService:
+    return ai_service
+
+
+# -------------------------------
+# Auth
+# -------------------------------
+
+def get_auth_service(
+    db: AsyncSession = Depends(get_db),
+) -> AuthService:
     return AuthService(
-        repository=auth_repository,
-        email_repository=email_repository,
+        repository=AuthRepository(db),
+        email_repository=EmailVerificationRepository(db),
     )
-    
+
+
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: AsyncSession = Depends(get_db),
 ):
-    repository = AuthRepository(db)
-
     return await AuthService(
-        repository=repository,
+        repository=AuthRepository(db),
         email_repository=EmailVerificationRepository(db),
     ).get_current_user(token)
-    
-async def get_current_active_user(user=Depends(get_current_user)):
+
+
+async def get_current_active_user(
+    user=Depends(get_current_user),
+):
     return await AuthService.validate_active_user(user)
+
 
 def require_roles(*roles: Role):
     async def dependency(
@@ -61,97 +96,101 @@ def require_roles(*roles: Role):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Insufficient permissions.",
             )
-
         return current_user
 
     return dependency
 
+
 def require_admin():
     return require_roles(Role.ADMIN)
 
-def get_workspace_service(db: AsyncSession = Depends(get_db),) -> WorkspaceService:
-    workspace_repository = WorkspaceRepository(db)
-    workspace_member_repository = WorkspaceMemberRepository(db)
 
+# -------------------------------
+# Workspace
+# -------------------------------
+
+def get_workspace_service(
+    db: AsyncSession = Depends(get_db),
+) -> WorkspaceService:
     return WorkspaceService(
-        repository=workspace_repository,
-        member_repository=workspace_member_repository,
+        repository=WorkspaceRepository(db),
+        member_repository=WorkspaceMemberRepository(db),
     )
+
 
 def get_workspace_member_service(
     db: AsyncSession = Depends(get_db),
 ) -> WorkspaceMemberService:
-
     return WorkspaceMemberService(
         workspace_repository=WorkspaceRepository(db),
         member_repository=WorkspaceMemberRepository(db),
         invitation_repository=WorkspaceInvitationRepository(db),
         auth_repository=AuthRepository(db),
     )
-    
+
+
+# -------------------------------
+# Resource
+# -------------------------------
+
 def get_resource_service(
     db: AsyncSession = Depends(get_db),
 ) -> ResourceService:
-    resource_repository = ResourceRepository(db)
-
-    chunk_repository = ChunkRepository(db)
-    
-    workspace_repository = WorkspaceRepository(db)
-
-    member_repository = WorkspaceMemberRepository(db)
-
-    invitation_repository = WorkspaceInvitationRepository(db)
-
-    auth_repository = AuthRepository(db)
 
     workspace_member_service = WorkspaceMemberService(
-        workspace_repository=workspace_repository,
-        member_repository=member_repository,
-        invitation_repository=invitation_repository,
-        auth_repository=auth_repository,
+        workspace_repository=WorkspaceRepository(db),
+        member_repository=WorkspaceMemberRepository(db),
+        invitation_repository=WorkspaceInvitationRepository(db),
+        auth_repository=AuthRepository(db),
     )
 
     return ResourceService(
-        repository=resource_repository,
-        chunk_repository=chunk_repository,
+        repository=ResourceRepository(db),
+        chunk_repository=ChunkRepository(db),
         workspace_member_service=workspace_member_service,
         parser_service=ParserService(),
         chunking_service=ChunkingService(),
-        embedding_service=EmbeddingService(),
+        embedding_service=get_embedding_service(),
     )
-    
-def get_chat_service(
-    db: AsyncSession =Depends(get_db),
-) -> ChatService:
-    chat_repository = ChatRepository(db)
-    workspace_repository = WorkspaceRepository(db)
-    member_repository = WorkspaceMemberRepository(db)
-    resource_repository = ResourceRepository(db)
-    chunk_repository = ChunkRepository(db)
 
+
+# -------------------------------
+# Chat
+# -------------------------------
+
+def get_chat_service(
+    db: AsyncSession = Depends(get_db),
+) -> ChatService:
     return ChatService(
-        chat_repository=chat_repository,
-        workspace_repository=workspace_repository,
-        member_repository=member_repository,
-        resource_repository=resource_repository,
-        chunk_repository=chunk_repository,
-        embedding_service=EmbeddingService(),
-        ai_service=get_ai_service(),
+        chat_repository=ChatRepository(db),
+        workspace_repository=WorkspaceRepository(db),
+        member_repository=WorkspaceMemberRepository(db),
+        resource_repository=ResourceRepository(db),
+        chunk_repository=ChunkRepository(db),
+        embedding_service=get_embedding_service(),
+        ai_service=ai_service,
     )
-    
+
+
+# -------------------------------
+# Quiz
+# -------------------------------
+
 def get_quiz_service(
-        db: AsyncSession = Depends(get_db),
-    ) -> QuizService:
-        return QuizService(
-            workspace_repository=WorkspaceRepository(db),
-            member_repository=WorkspaceMemberRepository(db),
-            chunk_repository=ChunkRepository(db),
-            embedding_service=EmbeddingService(),
-            ai_service=get_ai_service(),
-        )
-    
-def get_ai_service() -> AIService:
-    return AIService()
+    db: AsyncSession = Depends(get_db),
+) -> QuizService:
+    return QuizService(
+        workspace_repository=WorkspaceRepository(db),
+        member_repository=WorkspaceMemberRepository(db),
+        chunk_repository=ChunkRepository(db),
+        embedding_service=get_embedding_service(),
+        ai_service=ai_service,
+    )
+
+
+# -------------------------------
+# Flashcards
+# -------------------------------
 
 def get_flashcard_service(
     db: AsyncSession = Depends(get_db),
@@ -160,6 +199,22 @@ def get_flashcard_service(
         workspace_repository=WorkspaceRepository(db),
         member_repository=WorkspaceMemberRepository(db),
         chunk_repository=ChunkRepository(db),
-        embedding_service=EmbeddingService(),
-        ai_service=AIService(),
+        embedding_service=get_embedding_service(),
+        ai_service=ai_service,
+    )
+
+
+# -------------------------------
+# Summary
+# -------------------------------
+
+def get_summary_service(
+    db: AsyncSession = Depends(get_db),
+) -> SummaryService:
+    return SummaryService(
+        workspace_repository=WorkspaceRepository(db),
+        member_repository=WorkspaceMemberRepository(db),
+        chunk_repository=ChunkRepository(db),
+        embedding_service=get_embedding_service(),
+        ai_service=ai_service,
     )

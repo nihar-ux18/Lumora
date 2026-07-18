@@ -160,3 +160,44 @@ Retrieved Context:
         return json.loads(
             response.choices[0].message.content
         )
+        
+    async def generate_summary(
+        self,
+        context: str,
+        topic: str,
+    ):
+        return await self.generate_json(
+            system_prompt=(
+                "You are an educational assistant.\n"
+                "Summarize ONLY the provided context.\n"
+                "Do not use outside knowledge.\n"
+                "Return ONLY valid JSON."
+            ),
+            user_prompt=f"""
+    Generate a concise summary.
+    
+    Topic:
+    {topic}
+    
+    Context:
+    {context}
+    
+    Return JSON:
+    
+    {{
+      "summary": "..."
+    }}
+    
+    Rules:
+    - Use ONLY the provided context.
+    - Keep the summary concise and factual.
+    - If the context does not contain enough information about the requested topic, return:
+    
+    {{
+      "summary": "I couldn't find enough information in this workspace."
+    }}
+    
+    - Do not wrap JSON in markdown.
+    - Do not explain anything.
+    """,
+        )
