@@ -14,6 +14,7 @@ from app.repositories.resource_repository import ResourceRepository
 from app.repositories.chat_repository import ChatRepository
 from app.repositories.chunk_repository import ChunkRepository
 from app.services.chat_service import ChatService
+from app.services.flashcard_service import FlashcardService
 from app.services.resource_service import ResourceService
 from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.parser_service import ParserService
@@ -151,3 +152,14 @@ def get_quiz_service(
     
 def get_ai_service() -> AIService:
     return AIService()
+
+def get_flashcard_service(
+    db: AsyncSession = Depends(get_db),
+) -> FlashcardService:
+    return FlashcardService(
+        workspace_repository=WorkspaceRepository(db),
+        member_repository=WorkspaceMemberRepository(db),
+        chunk_repository=ChunkRepository(db),
+        embedding_service=EmbeddingService(),
+        ai_service=AIService(),
+    )

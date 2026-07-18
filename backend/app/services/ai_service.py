@@ -137,3 +137,26 @@ Retrieved Context:
         content = response.choices[0].message.content
 
         return json.loads(content)
+    
+    async def generate_json(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+    ):
+        response = self.client.chat.completions.create(
+            model=settings.groq_model,
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt,
+                },
+            ],
+        )
+    
+        return json.loads(
+            response.choices[0].message.content
+        )
