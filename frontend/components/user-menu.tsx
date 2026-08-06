@@ -4,19 +4,23 @@ import { useState } from "react";
 import { User, Settings, LogOut, ChevronDown, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/providers/auth-provider";
 
-interface UserMenuProps {
-  userName?: string;
-  userEmail?: string;
-  avatarUrl?: string;
-}
-
-export function UserMenu({
-  userName = "Alex Morgan",
-  userEmail = "alex.morgan@lumora.ai",
-  avatarUrl,
-}: UserMenuProps) {
+export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const { currentUser, logout } = useAuth();
+
+  const userName = currentUser?.full_name || "Guest User";
+  const userEmail = currentUser?.email || "guest@lumora.ai";
+  // Create initials from full name or email
+  const initials = currentUser?.full_name
+    ? currentUser.full_name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase()
+    : "GU";
 
   return (
     <div className="relative">
@@ -27,9 +31,8 @@ export function UserMenu({
         className="flex items-center gap-2.5 h-9 pl-1 pr-2.5 rounded-[12px] bg-[#131316]/60 border border-white/10 backdrop-blur-[20px] hover:border-white/20 transition-colors focus:outline-none"
       >
         <Avatar className="h-7 w-7 border border-white/10">
-          {avatarUrl && <AvatarImage src={avatarUrl} alt={userName} />}
           <AvatarFallback className="bg-[#4A00FF] text-white text-[11px] font-medium">
-            AM
+            {initials}
           </AvatarFallback>
         </Avatar>
         <span className="text-xs font-medium text-foreground hidden sm:inline-block">
@@ -87,7 +90,10 @@ export function UserMenu({
               <div className="border-t border-white/10 my-1" />
 
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  logout();
+                }}
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors"
               >
                 <LogOut className="h-4 w-4 text-red-400" />

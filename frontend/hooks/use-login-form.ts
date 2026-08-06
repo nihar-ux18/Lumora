@@ -1,9 +1,11 @@
 "use client";
 
+import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useAuth } from "@/providers/auth-provider";
 
 export const loginSchema = z.object({
   email: z
@@ -13,7 +15,7 @@ export const loginSchema = z.object({
   password: z
     .string()
     .min(8, "Password must be at least 8 characters"),
-  rememberMe: z.boolean().default(false),
+  rememberMe: z.boolean(),
 });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
@@ -21,6 +23,7 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 export function useLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const { login } = useAuth();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -37,12 +40,19 @@ export function useLoginForm() {
     setServerError(null);
 
     try {
-      // Mock submit simulation delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      console.log("Login submitted successfully:", values);
-      // Simulated navigation/action placeholder
-    } catch (err) {
-      setServerError("Invalid email or password. Please try again.");
+      await login({
+        email: values.email,
+        password: values.password,
+      });
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        setServerError(
+          err.response?.data?.detail ??
+          "Invalid email or password. Please try again."
+        );
+      } else {
+        setServerError("Something went wrong.");
+      }
     } finally {
       setIsLoading(false);
     }

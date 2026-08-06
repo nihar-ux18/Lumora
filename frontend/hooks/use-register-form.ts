@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useAuth } from "@/providers/auth-provider";
 
 export const registerSchema = z
   .object({
@@ -61,6 +62,7 @@ export function calculatePasswordStrength(password: string): {
 export function useRegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const { register } = useAuth();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -79,12 +81,13 @@ export function useRegisterForm() {
     setServerError(null);
 
     try {
-      // Mock submit simulation delay
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      console.log("Register submitted successfully:", values);
-      // Simulated navigation/action placeholder
-    } catch (err) {
-      setServerError("Registration failed. Please try again.");
+      await register({
+        fullname: values.fullName,
+        email: values.email,
+        password: values.password,
+      });
+    } catch (err: any) {
+      setServerError(err?.response?.data?.detail || "Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
