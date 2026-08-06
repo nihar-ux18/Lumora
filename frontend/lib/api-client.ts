@@ -1,10 +1,9 @@
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "axios";
-import { API_BASE_URL } from "@/constants/api";
-import { STORAGE_KEYS } from "@/constants/config";
-import { getItem } from "./storage";
+
+export const ACCESS_TOKEN_KEY = "lumora_access_token";
 
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -14,9 +13,11 @@ export const apiClient: AxiosInstance = axios.create({
 // Request Interceptor: Attach Auth Token
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = getItem<string>(STORAGE_KEYS.AUTH_TOKEN);
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -25,24 +26,23 @@ apiClient.interceptors.request.use(
 
 // Response Interceptor: Global Error Handling
 apiClient.interceptors.response.use(
-  (response) => response.data,
+  (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== "undefined") {
-        // Handle unauthorized / expired token
-        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 401) {
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(ACCESS_TOKEN_KEY);
+          // Potential redirect logic here
+        }
+      } else if (status === 403) {
+        console.error("Forbidden: You do not have permission to access this resource.");
+      } else if (status === 500) {
+        console.error("Internal Server Error: Please try again later.");
       }
     }
-    return Promise.reject(error.response?.data || error.message);
+    return Promise.reject(error);
   }
 );
-
-export const api = {
-  get: <T>(url: string, params?: object) => apiClient.get<unknown, T>(url, { params }),
-  post: <T>(url: string, data?: object) => apiClient.post<unknown, T>(url, data),
-  put: <T>(url: string, data?: object) => apiClient.put<unknown, T>(url, data),
-  patch: <T>(url: string, data?: object) => apiClient.patch<unknown, T>(url, data),
-  delete: <T>(url: string) => apiClient.delete<unknown, T>(url),
-};
 
 export default apiClient;
