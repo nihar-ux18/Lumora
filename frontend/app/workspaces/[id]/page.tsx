@@ -2,33 +2,68 @@
 
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { workspaceService } from "@/services/workspace.service";
+import { resourceService } from "@/services/resource.service";
 import { formatDate, getDeterministicColor } from "@/lib/utils";
-import { AlertCircle, Folder, Calendar, Users, Settings, Trash2, ArrowLeft } from "lucide-react";
-import { motion } from "framer-motion";
+import { AlertCircle, Folder, Calendar, Users, Settings, Trash2, ArrowLeft, Search as SearchIcon, Plus, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { DeleteWorkspaceDialog } from "@/components/workspaces/delete-workspace-dialog";
+import { UploadResourceDialog } from "@/components/resources/upload-resource-dialog";
+import { ResourceCard } from "@/components/resources/resource-card";
+import { DeleteResourceDialog } from "@/components/resources/delete-resource-dialog";
+import { toast } from "sonner";
 
 export default function WorkspaceDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const workspaceId = params.id as string;
+  
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [resourceToDelete, setResourceToDelete] = useState<{ id: string, title: string } | null>(null);
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<{ chunk_index: number, content: string }[] | null>(null);
 
   const { 
     data: workspace, 
-    isLoading, 
-    isError, 
-    refetch 
+    isLoading: isWorkspaceLoading, 
+    isError: isWorkspaceError, 
+    refetch: refetchWorkspace 
   } = useQuery({
     queryKey: ["workspace", workspaceId],
     queryFn: () => workspaceService.getWorkspace(workspaceId),
     enabled: !!workspaceId,
   });
 
-  if (isLoading) {
+  const {
+    data: resources = [],
+    isLoading: isResourcesLoading,
+  } = useQuery({
+    queryKey: ["resources", workspaceId],
+    queryFn: () => resourceService.listResources(workspaceId),
+    enabled: !!workspaceId,
+  });
+
+  const searchMutation = useMutation({
+    mutationFn: () => resourceService.searchResources(workspaceId, { query: searchQuery, limit: 5 }),
+    onSuccess: (data) => setSearchResults(data),
+    onError: () => toast.error("Failed to search resources"),
+  });
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) {
+      setSearchResults(null);
+      return;
+    }
+    searchMutation.mutate();
+  };
+
+  if (isWorkspaceLoading) {
     return (
       <AppShell>
         <div className="mx-auto w-full max-w-7xl animate-pulse">
@@ -50,7 +85,7 @@ export default function WorkspaceDetailsPage() {
     );
   }
 
-  if (isError || !workspace) {
+  if (isWorkspaceError || !workspace) {
     return (
       <AppShell>
         <div className="mx-auto w-full max-w-7xl">
@@ -69,7 +104,7 @@ export default function WorkspaceDetailsPage() {
               The workspace you are looking for might have been deleted or you don't have access to it.
             </p>
             <button 
-              onClick={() => refetch()}
+              onClick={() => refetchWorkspace()}
               className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-white/15"
             >
               Try Again
@@ -132,11 +167,117 @@ export default function WorkspaceDetailsPage() {
           {/* Main Content Area */}
           <div className="md:col-span-2 space-y-6">
             <div className="rounded-[16px] bg-[#131316]/60 border border-white/10 p-6 backdrop-blur-[20px]">
-              <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-                <Folder className="h-4 w-4 text-[#4A00FF]" />
-                Resources
-              </h3>
-              {/* TODO: Fetch and display resources here once backend is integrated */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Folder className="h-4 w-4 text-[#4A00FF]" />
+                  Resources
+                </h3>
+                
+                <div className="flex items-center gap-3">
+                  <form onSubmit={handleSearch} className="relative">
+                    <input
+                      type="text"
+                      placeholder="Ask AI or search..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full sm:w-[250px] h-9 pl-9 pr-4 rounded-[10px] bg-white/5 border border-white/10 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors"
+                    />
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <button type="submit" className="hidden" />
+                  </form>
+                  <button 
+                    onClick={() => setIsUploadDialogOpen(true)}
+                    className="flex shrink-0 items-center gap-1.5 rounded-[10px] bg-[#4A00FF] px-3 py-2 text-xs font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Upload
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Results Area */}
+              <AnimatePresence>
+                {searchQuery && searchMutation.isPending && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-6 flex items-center justify-center py-8 border border-white/10 rounded-[12px] bg-white/5"
+                  >
+                    <Loader2 className="h-5 w-5 animate-spin text-[#4A00FF]" />
+                  </motion.div>
+                )}
+                {searchResults && (
+                  <motion.div 
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-6 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-semibold text-[#4A00FF]">Semantic Search Results</h4>
+                      <button 
+                        onClick={() => { setSearchResults(null); setSearchQuery(""); }}
+                        className="text-[10px] text-muted-foreground hover:text-foreground"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                    {searchResults.length === 0 ? (
+                      <div className="py-6 text-center text-xs text-muted-foreground border border-white/5 rounded-[12px] bg-white/5">
+                        No semantic chunks matched your query.
+                      </div>
+                    ) : (
+                      <div className="grid gap-3">
+                        {searchResults.map((result, idx) => (
+                          <div key={idx} className="p-4 rounded-[12px] bg-white/5 border border-white/10 text-xs text-muted-foreground leading-relaxed">
+                            <span className="inline-block px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-mono text-foreground mb-2">
+                              Chunk {result.chunk_index}
+                            </span>
+                            <br />
+                            {result.content}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Resource Grid */}
+              {isResourcesLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="h-32 rounded-[16px] bg-white/5 border border-white/10 animate-pulse" />
+                  ))}
+                </div>
+              ) : resources.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed border-white/10 rounded-[12px]">
+                  <p className="text-sm text-muted-foreground mb-4">No resources added yet.</p>
+                  <button 
+                    onClick={() => setIsUploadDialogOpen(true)}
+                    className="text-xs font-medium text-[#4A00FF] hover:text-[#5A14FF]"
+                  >
+                    + Upload Resource
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {resources.map((resource, index) => (
+                    <ResourceCard
+                      key={resource.id}
+                      id={resource.id}
+                      title={resource.title}
+                      resource_type={resource.resource_type}
+                      file_path={resource.file_path}
+                      source_url={resource.source_url}
+                      created_at={resource.created_at}
+                      delay={index * 0.05}
+                      onDelete={() => setResourceToDelete({ id: resource.id, title: resource.title })}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -175,6 +316,21 @@ export default function WorkspaceDetailsPage() {
         workspaceId={workspace.id}
         workspaceName={workspace.name}
       />
+
+      <UploadResourceDialog
+        isOpen={isUploadDialogOpen}
+        onClose={() => setIsUploadDialogOpen(false)}
+        workspaceId={workspace.id}
+      />
+
+      <DeleteResourceDialog
+        isOpen={!!resourceToDelete}
+        onClose={() => setResourceToDelete(null)}
+        workspaceId={workspace.id}
+        resourceId={resourceToDelete?.id || ""}
+        resourceTitle={resourceToDelete?.title || ""}
+      />
     </AppShell>
   );
 }
+
