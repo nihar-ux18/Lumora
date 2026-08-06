@@ -23,9 +23,6 @@ export const WORKSPACES = {
   DELETE: (id: string) => `/workspaces/${id}`,
   INVITE: (id: string) => `/workspaces/${id}/invite`,
   ACCEPT_INVITATION: "/workspaces/invitations/accept",
-  MEMBERS: (id: string) => `/workspaces/${id}/members`,
-  UPDATE_MEMBER: (workspaceId: string, userId: string) => `/workspaces/${workspaceId}/members/${userId}`,
-  REMOVE_MEMBER: (workspaceId: string, userId: string) => `/workspaces/${workspaceId}/members/${userId}`,
 };
 
 export const RESOURCES = {

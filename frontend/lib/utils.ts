@@ -28,3 +28,24 @@ export function getInitials(name: string): string {
     .toUpperCase()
     .slice(0, 2);
 }
+
+const WORKSPACE_COLORS = [
+  "bg-blue-500",
+  "bg-[#4A00FF]",
+  "bg-emerald-500",
+  "bg-rose-500",
+  "bg-amber-500",
+  "bg-cyan-500",
+  "bg-purple-500",
+  "bg-indigo-500",
+];
+
+export function getDeterministicColor(id: string): string {
+  if (!id) return WORKSPACE_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % WORKSPACE_COLORS.length;
+  return WORKSPACE_COLORS[index];
+}

@@ -1,14 +1,19 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useAuth } from "@/providers/auth-provider";
 
 export function DashboardHeader() {
+  const { user } = useAuth();
+  
   const currentDate = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
     year: "numeric",
   }).format(new Date());
+
+  const displayName = user?.full_name || user?.email?.split('@')[0] || "User";
 
   return (
     <motion.div
@@ -22,7 +27,7 @@ export function DashboardHeader() {
           {currentDate}
         </p>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
-          Welcome back, <span className="text-[#4A00FF]">Alex</span>
+          Welcome back, <span className="text-[#4A00FF]">{displayName}</span>
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Here&apos;s an overview of your knowledge base and recent activities.

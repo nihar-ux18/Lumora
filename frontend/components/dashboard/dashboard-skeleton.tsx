@@ -12,7 +12,7 @@ export function DashboardSkeleton() {
 
       {/* Stats Grid Skeleton */}
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+        {[...Array(1)].map((_, i) => (
           <div
             key={i}
             className="h-[120px] rounded-[16px] bg-[#131316]/40 border border-white/5 p-5"

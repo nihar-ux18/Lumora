@@ -7,9 +7,7 @@ interface WorkspacePreviewCardProps {
   id: string;
   title: string;
   description: string;
-  resourceCount: number;
   lastUpdated: string;
-  badges: string[];
   color: string;
   delay?: number;
 }
@@ -17,9 +15,7 @@ interface WorkspacePreviewCardProps {
 export function WorkspacePreviewCard({
   title,
   description,
-  resourceCount,
   lastUpdated,
-  badges,
   color,
   delay = 0,
 }: WorkspacePreviewCardProps) {
@@ -47,21 +43,11 @@ export function WorkspacePreviewCard({
         {description}
       </p>
 
-      <div className="flex flex-wrap gap-1.5 mb-4">
-        {badges.map((badge) => (
-          <span
-            key={badge}
-            className="rounded-[6px] bg-white/5 border border-white/10 px-2 py-0.5 text-[10px] font-medium text-zinc-300"
-          >
-            {badge}
-          </span>
-        ))}
-      </div>
-
       <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
         <div className="flex items-center gap-1.5 text-muted-foreground">
+          {/* TODO: Add resource count when backend supports it */}
           <FileText className="h-3 w-3" />
-          <span className="text-[11px]">{resourceCount} resources</span>
+          <span className="text-[11px]">Resources</span>
         </div>
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Clock className="h-3 w-3" />
