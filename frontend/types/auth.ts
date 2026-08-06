@@ -19,3 +19,14 @@ export interface AuthResponse {
   access_token: string;
   token_type: string;
 }
+
+export interface TokenResponse {
+  access_token: string;
+  token_type: string;
+}
+
+export interface UserResponse {
+  id: string;
+  full_name: string;
+  email: string;
+}
