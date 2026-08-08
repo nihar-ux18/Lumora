@@ -86,8 +86,13 @@ export function useRegisterForm() {
         email: values.email,
         password: values.password,
       });
-    } catch (err: any) {
-      setServerError(err?.response?.data?.detail || "Registration failed. Please try again.");
+    } catch (err: unknown) {
+      let message = "Registration failed. Please try again.";
+      if (typeof err === "object" && err !== null && "response" in err) {
+        const axErr = err as { response?: { data?: { detail?: string } } };
+        message = axErr.response?.data?.detail || message;
+      }
+      setServerError(message);
     } finally {
       setIsLoading(false);
     }

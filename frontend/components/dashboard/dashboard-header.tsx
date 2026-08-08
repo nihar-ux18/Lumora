@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/providers/auth-provider";
 
 export function DashboardHeader() {
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
   
   const currentDate = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -13,7 +13,7 @@ export function DashboardHeader() {
     year: "numeric",
   }).format(new Date());
 
-  const displayName = user?.full_name || user?.email?.split('@')[0] || "User";
+  const displayName = currentUser?.full_name || currentUser?.email?.split('@')[0] || "User";
 
   return (
     <motion.div

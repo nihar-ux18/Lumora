@@ -51,6 +51,7 @@ export function UploadResourceDialog({ isOpen, onClose, workspaceId }: UploadRes
     handleSubmit,
     watch,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<UploadFormValues>({
     resolver: zodResolver(uploadSchema),
@@ -62,6 +63,7 @@ export function UploadResourceDialog({ isOpen, onClose, workspaceId }: UploadRes
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const resourceType = watch("resource_type");
   const isFileType = ["pdf", "docx", "image"].includes(resourceType);
 
@@ -166,7 +168,7 @@ export function UploadResourceDialog({ isOpen, onClose, workspaceId }: UploadRes
                     key={type.id}
                     type="button"
                     onClick={() => {
-                      reset({ ...watch(), resource_type: type.id as any });
+                      setValue("resource_type", type.id as "pdf" | "docx" | "image" | "url" | "note");
                     }}
                     disabled={createMutation.isPending}
                     className={`flex flex-col items-center justify-center py-3 rounded-[12px] border transition-colors ${

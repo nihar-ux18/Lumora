@@ -23,14 +23,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   
-  // To avoid hydration mismatch and premature redirects, wait for mount
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 0);
+    return () => clearTimeout(timer);
   }, []);
 
-  const { data: currentUser = null, isLoading: isUserLoading, refetch } = useQuery({
+  const { data: currentUser = null, isLoading: isUserLoading } = useQuery({
     queryKey: ["currentUser"],
     queryFn: async () => {
       const token = typeof window !== "undefined" ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       try {
         return await authService.getMe();
-      } catch (error) {
+      } catch {
         if (typeof window !== "undefined") {
           localStorage.removeItem(ACCESS_TOKEN_KEY);
         }
@@ -60,8 +60,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success("Login successful");
       router.push("/dashboard");
     },
-    onError: (error: any) => {
-      const message = error?.response?.data?.detail || "Invalid email or password";
+    onError: (error: unknown) => {
+      let message = "Invalid email or password";
+      if (typeof error === "object" && error !== null && "response" in error) {
+        const axErr = error as { response?: { data?: { detail?: string } } };
+        message = axErr.response?.data?.detail || message;
+      }
       toast.error(message);
       throw error;
     }
@@ -73,8 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       toast.success("Account created successfully. Please sign in.");
       router.push("/auth/login");
     },
-    onError: (error: any) => {
-      const message = error?.response?.data?.detail || "Registration failed";
+    onError: (error: unknown) => {
+      let message = "Registration failed";
+      if (typeof error === "object" && error !== null && "response" in error) {
+        const axErr = error as { response?: { data?: { detail?: string } } };
+        message = axErr.response?.data?.detail || message;
+      }
       toast.error(message);
       throw error;
     }
@@ -82,12 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      try {
-        await authService.logout();
-      } catch (error) {
-        // Continue with local logout even if server logout fails
-        console.error("Server logout failed", error);
-      }
+      // Local logout only, no backend endpoint exists
+      return Promise.resolve();
     },
     onSettled: () => {
       if (typeof window !== "undefined") {

@@ -6,7 +6,17 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { workspaceService } from "@/services/workspace.service";
 import { resourceService } from "@/services/resource.service";
 import { formatDate, getDeterministicColor } from "@/lib/utils";
-import { AlertCircle, Folder, Calendar, Users, Settings, Trash2, ArrowLeft, Search as SearchIcon, Plus, Loader2 } from "lucide-react";
+import { 
+  AlertCircle, 
+  Folder, 
+  Calendar, 
+  Settings, 
+  Trash2, 
+  ArrowLeft, 
+  Search as SearchIcon, 
+  Loader2, 
+  Plus 
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -101,7 +111,7 @@ export default function WorkspaceDetailsPage() {
             <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
             <h2 className="text-lg font-semibold text-foreground mb-2">Workspace Not Found</h2>
             <p className="text-sm text-muted-foreground mb-6 max-w-sm">
-              The workspace you are looking for might have been deleted or you don't have access to it.
+              The workspace you are looking for might have been deleted or you don&apos;t have access to it.
             </p>
             <button 
               onClick={() => refetchWorkspace()}

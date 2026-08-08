@@ -100,7 +100,7 @@ export default function WorkspacesPage() {
           </div>
         ) : filteredWorkspaces.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <p className="text-sm text-muted-foreground">No workspaces found matching "{searchQuery}"</p>
+            <p className="text-sm text-muted-foreground">No workspaces found matching &quot;{searchQuery}&quot;</p>
           </div>
         ) : (
           <motion.div 

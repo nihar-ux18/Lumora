@@ -1,6 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import { AUTH, USERS } from "@/constants";
-import { User, TokenResponse, UserResponse } from "@/types/auth"; // Assume these match backend
+import { AUTH } from "@/constants";
 
 export interface RegisterRequest {
   fullname: string;

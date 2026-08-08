@@ -80,7 +80,7 @@ export function DeleteWorkspaceDialog({
 
             <div className="p-6">
               <p className="text-sm text-foreground mb-4 leading-relaxed">
-                Are you sure you want to delete <strong className="text-white">"{workspaceName}"</strong>?
+                Are you sure you want to delete <strong className="text-white">&quot;{workspaceName}&quot;</strong>?
               </p>
               <p className="text-xs text-muted-foreground mb-6 leading-relaxed">
                 This action is permanent and cannot be undone. All resources, chats, and configurations within this workspace will be permanently removed.

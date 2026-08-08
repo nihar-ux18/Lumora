@@ -5,7 +5,7 @@ import { resourceService } from "@/services/resource.service";
 import { toast } from "sonner";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import { AxiosError } from "axios";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface DeleteResourceDialogProps {
   isOpen: boolean;

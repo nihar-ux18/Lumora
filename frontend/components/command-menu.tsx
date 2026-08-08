@@ -13,7 +13,8 @@ export function CommandMenu({ isOpen = false, onClose }: CommandMenuProps) {
   const [open, setOpen] = useState(isOpen);
 
   useEffect(() => {
-    setOpen(isOpen);
+    const timer = setTimeout(() => setOpen(isOpen), 0);
+    return () => clearTimeout(timer);
   }, [isOpen]);
 
   useEffect(() => {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { User, Settings, LogOut, ChevronDown, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/providers/auth-provider";
 
 export function UserMenu() {
