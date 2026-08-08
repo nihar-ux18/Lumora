@@ -1,6 +1,6 @@
 export interface User {
   id: string;
-  full_name: string;
+  fullname: string;
   email: string;
 }
 
@@ -10,7 +10,7 @@ export interface LoginRequest {
 }
 
 export interface RegisterRequest {
-  full_name: string;
+  fullname: string;
   email: string;
   password: string;
 }
@@ -22,11 +22,17 @@ export interface AuthResponse {
 
 export interface TokenResponse {
   access_token: string;
+  refresh_token: string;
   token_type: string;
 }
 
 export interface UserResponse {
   id: string;
-  full_name: string;
+  fullname: string;
   email: string;
+  avatar_url?: string | null;
+  role?: string;
+  is_verified?: boolean;
+  is_active?: boolean;
+  created_at?: string;
 }

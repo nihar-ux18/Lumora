@@ -13,7 +13,7 @@ export function DashboardHeader() {
     year: "numeric",
   }).format(new Date());
 
-  const displayName = currentUser?.full_name || currentUser?.email?.split('@')[0] || "User";
+  const displayName = currentUser?.fullname || currentUser?.email?.split('@')[0] || "User";
 
   return (
     <motion.div

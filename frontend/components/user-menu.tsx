@@ -10,11 +10,11 @@ export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { currentUser, logout } = useAuth();
 
-  const userName = currentUser?.full_name || "Guest User";
+  const userName = currentUser?.fullname || "Guest User";
   const userEmail = currentUser?.email || "guest@lumora.ai";
   // Create initials from full name or email
-  const initials = currentUser?.full_name
-    ? currentUser.full_name
+  const initials = currentUser?.fullname
+    ? currentUser.fullname
         .split(" ")
         .map((n) => n[0])
         .join("")
