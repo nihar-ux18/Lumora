@@ -8,7 +8,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { resourceService, ResourceType } from "@/services/resource.service";
 import { toast } from "sonner";
 import { FileUp, Loader2, X, Link as LinkIcon, FileText, Image as ImageIcon, AlignLeft } from "lucide-react";
-import { AxiosError, AxiosProgressEvent } from "axios";
+import axios, { AxiosError, AxiosProgressEvent } from "axios";
 import { motion } from "framer-motion";
 
 const uploadSchema = z.object({
@@ -16,7 +16,7 @@ const uploadSchema = z.object({
   description: z.string().max(1000, "Description is too long").optional().or(z.literal("")),
   resource_type: z.enum(["pdf", "docx", "image", "url", "note"]),
   source_url: z.string().max(1000).url("Must be a valid URL").optional().or(z.literal("")),
-  file: z.any().optional(),
+  file: z.custom<FileList>().optional(),
 }).superRefine((data, ctx) => {
   if (data.resource_type === "url" && !data.source_url) {
     ctx.addIssue({
@@ -102,7 +102,7 @@ export function UploadResourceDialog({ isOpen, onClose, workspaceId }: UploadRes
     },
     onError: (error: Error | AxiosError) => {
       let msg = "Failed to add resource";
-      if ("response" in error && error.response?.data) {
+      if (axios.isAxiosError(error) && error.response?.data) {
         const data = error.response.data as { detail?: unknown };
         const detail = data.detail;
         if (Array.isArray(detail)) {

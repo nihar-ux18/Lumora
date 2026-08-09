@@ -7,6 +7,20 @@ import { UserResponse } from "@/types/auth";
 import { ACCESS_TOKEN_KEY } from "@/lib/api-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+
+const isMockAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_MOCK_AUTH === "true";
+const MOCK_TOKEN = "development-mock-token";
+
+const mockUser: UserResponse = {
+  id: "mock-user-id",
+  fullname: "Nihar Patil",
+  email: "nihar@example.com",
+  role: "user",
+  is_verified: true,
+  is_active: true,
+  created_at: new Date().toISOString(),
+};
 
 interface AuthContextType {
   currentUser: UserResponse | null;
@@ -26,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Genuinely required to prevent Next.js SSR hydration mismatches while avoiding React 18 synchronous render warnings
     const timer = setTimeout(() => setMounted(true), 0);
     return () => clearTimeout(timer);
   }, []);
@@ -35,6 +50,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: async () => {
       const token = typeof window !== "undefined" ? localStorage.getItem(ACCESS_TOKEN_KEY) : null;
       if (!token) return null;
+      
+      if (isMockAuthEnabled && token === MOCK_TOKEN) {
+        return mockUser;
+      }
       
       try {
         return await authService.getMe();
@@ -51,7 +70,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: authService.login,
+    mutationFn: async (data: LoginRequest) => {
+      if (isMockAuthEnabled) {
+        // DEVELOPMENT ONLY: Hardcoded mock credentials
+        if (data.email === "demo@lumora.dev" && data.password === "LumoraDemo123!") {
+          return { access_token: MOCK_TOKEN, token_type: "bearer" };
+        }
+        throw new Error("Invalid mock credentials");
+      }
+      return await authService.login(data);
+    },
     onSuccess: (data) => {
       if (typeof window !== "undefined") {
         localStorage.setItem(ACCESS_TOKEN_KEY, data.access_token);
@@ -62,9 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onError: (error: unknown) => {
       let message = "Invalid email or password";
-      if (typeof error === "object" && error !== null && "response" in error) {
-        const axErr = error as { response?: { data?: { detail?: string } } };
-        message = axErr.response?.data?.detail || message;
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.detail || message;
       }
       toast.error(message);
       throw error;
@@ -72,16 +99,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: authService.register,
+    mutationFn: async (data: RegisterRequest) => {
+      if (isMockAuthEnabled) {
+        return { message: "Mock registration successful" };
+      }
+      return await authService.register(data);
+    },
     onSuccess: () => {
       toast.success("Account created successfully. Please sign in.");
       router.push("/auth/login");
     },
     onError: (error: unknown) => {
       let message = "Registration failed";
-      if (typeof error === "object" && error !== null && "response" in error) {
-        const axErr = error as { response?: { data?: { detail?: string } } };
-        message = axErr.response?.data?.detail || message;
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.detail || message;
       }
       toast.error(message);
       throw error;

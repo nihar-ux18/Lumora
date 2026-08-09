@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { workspaceService, WorkspaceCreate } from "@/services/workspace.service";
 import { toast } from "sonner";
 import { FolderPlus, Loader2, X, AlignLeft } from "lucide-react";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 interface CreateWorkspaceDialogProps {
   isOpen: boolean;
@@ -28,6 +28,7 @@ export function CreateWorkspaceDialog({ isOpen, onClose }: CreateWorkspaceDialog
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Genuinely required to prevent Next.js SSR hydration mismatches while avoiding React 18 synchronous render warnings
     const timer = setTimeout(() => setMounted(true), 0);
     return () => clearTimeout(timer);
   }, []);
@@ -52,7 +53,7 @@ export function CreateWorkspaceDialog({ isOpen, onClose }: CreateWorkspaceDialog
     },
     onError: (error: Error | AxiosError) => {
       let msg = "Failed to create workspace";
-      if ("response" in error && error.response?.data) {
+      if (axios.isAxiosError(error) && error.response?.data) {
         const data = error.response.data as { detail?: unknown };
         const detail = data.detail;
         if (Array.isArray(detail)) {

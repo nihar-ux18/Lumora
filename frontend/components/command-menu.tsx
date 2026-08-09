@@ -13,6 +13,7 @@ export function CommandMenu({ isOpen = false, onClose }: CommandMenuProps) {
   const [open, setOpen] = useState(isOpen);
 
   useEffect(() => {
+    // Genuinely required to sync external state changes without triggering React 18 synchronous render warnings during render phase
     const timer = setTimeout(() => setOpen(isOpen), 0);
     return () => clearTimeout(timer);
   }, [isOpen]);

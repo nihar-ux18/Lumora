@@ -6,7 +6,7 @@ import { workspaceService } from "@/services/workspace.service";
 import { toast } from "sonner";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 
 interface DeleteWorkspaceDialogProps {
   isOpen: boolean;
@@ -34,7 +34,7 @@ export function DeleteWorkspaceDialog({
     },
     onError: (error: Error | AxiosError) => {
       let msg = "Failed to delete workspace";
-      if ("response" in error && error.response?.data) {
+      if (axios.isAxiosError(error) && error.response?.data) {
         const data = error.response.data as { detail?: unknown };
         const detail = data.detail;
         if (Array.isArray(detail)) {

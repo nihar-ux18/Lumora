@@ -2,6 +2,9 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "ax
 
 export const ACCESS_TOKEN_KEY = "lumora_access_token";
 
+const isMockAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_MOCK_AUTH === "true";
+const MOCK_TOKEN = "development-mock-token";
+
 export const apiClient: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   headers: {
@@ -16,7 +19,11 @@ apiClient.interceptors.request.use(
     if (typeof window !== "undefined") {
       const token = localStorage.getItem(ACCESS_TOKEN_KEY);
       if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+        if (isMockAuthEnabled && token === MOCK_TOKEN) {
+          // Do not send mock token to real backend
+        } else {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
     }
     return config;
@@ -32,8 +39,13 @@ apiClient.interceptors.response.use(
       const status = error.response.status;
       if (status === 401) {
         if (typeof window !== "undefined") {
-          localStorage.removeItem(ACCESS_TOKEN_KEY);
-          // Potential redirect logic here
+          const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+          if (isMockAuthEnabled && token === MOCK_TOKEN) {
+            // Keep mock session alive even if backend returns 401
+          } else {
+            localStorage.removeItem(ACCESS_TOKEN_KEY);
+            // Potential redirect logic here
+          }
         }
       } else if (status === 403) {
         console.error("Forbidden: You do not have permission to access this resource.");

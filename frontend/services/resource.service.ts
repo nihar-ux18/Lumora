@@ -75,9 +75,6 @@ export const resourceService = {
     formData.append("file", file);
     
     const response = await apiClient.post(RESOURCES.UPLOAD(resourceId), formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
       onUploadProgress,
     });
     return response.data;
