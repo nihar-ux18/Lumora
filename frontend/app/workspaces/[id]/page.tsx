@@ -25,6 +25,10 @@ import { UploadResourceDialog } from "@/components/resources/upload-resource-dia
 import { ResourceCard } from "@/components/resources/resource-card";
 import { DeleteResourceDialog } from "@/components/resources/delete-resource-dialog";
 import { toast } from "sonner";
+import { useAuth } from "@/providers/auth-provider";
+import { WorkspaceMembersList } from "@/components/workspaces/workspace-members-list";
+import { InviteMemberDialog } from "@/components/workspaces/invite-member-dialog";
+import { UserPlus } from "lucide-react";
 
 export default function WorkspaceDetailsPage() {
   const params = useParams();
@@ -33,7 +37,10 @@ export default function WorkspaceDetailsPage() {
   
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [resourceToDelete, setResourceToDelete] = useState<{ id: string, title: string } | null>(null);
+  
+  const { currentUser } = useAuth();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ chunk_index: number, content: string }[] | null>(null);
@@ -56,6 +63,17 @@ export default function WorkspaceDetailsPage() {
     queryKey: ["resources", workspaceId],
     queryFn: () => resourceService.listResources(workspaceId),
     enabled: !!workspaceId,
+  });
+
+  const isOwner = !!(currentUser && workspace && currentUser.id === workspace.owner_id);
+
+  const {
+    data: members = [],
+    isLoading: isMembersLoading,
+  } = useQuery({
+    queryKey: ["workspace-members", workspaceId],
+    queryFn: () => workspaceService.listMembers(workspaceId),
+    enabled: !!workspaceId && isOwner,
   });
 
   const searchMutation = useMutation({
@@ -313,7 +331,37 @@ export default function WorkspaceDetailsPage() {
                   </div>
                 </div>
 
-                {/* TODO: Fetch and display members here once backend is integrated */}
+                {isOwner && (
+                  <div className="mt-8 pt-6 border-t border-white/10">
+                    <div className="flex items-center justify-between mb-4">
+                      <h4 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                        Members ({members.length})
+                      </h4>
+                      <button
+                        onClick={() => setIsInviteDialogOpen(true)}
+                        className="text-[10px] flex items-center gap-1 font-medium text-[#4A00FF] hover:text-[#5A14FF] transition-colors"
+                      >
+                        <UserPlus className="h-3 w-3" />
+                        Invite
+                      </button>
+                    </div>
+
+                    {isMembersLoading ? (
+                      <div className="space-y-3 mt-4">
+                        {[...Array(3)].map((_, i) => (
+                          <div key={i} className="h-14 rounded-[12px] bg-white/5 border border-white/10 animate-pulse" />
+                        ))}
+                      </div>
+                    ) : (
+                      <WorkspaceMembersList 
+                        workspaceId={workspaceId}
+                        members={members}
+                        currentUserId={currentUser?.id || ""}
+                        isOwner={isOwner}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -325,6 +373,12 @@ export default function WorkspaceDetailsPage() {
         onClose={() => setIsDeleteDialogOpen(false)}
         workspaceId={workspace.id}
         workspaceName={workspace.name}
+      />
+
+      <InviteMemberDialog
+        isOpen={isInviteDialogOpen}
+        onClose={() => setIsInviteDialogOpen(false)}
+        workspaceId={workspace.id}
       />
 
       <UploadResourceDialog
