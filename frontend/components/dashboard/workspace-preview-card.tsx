@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Folder, MoreVertical, FileText, Clock } from "lucide-react";
+import { Folder, MoreVertical, Clock } from "lucide-react";
 
 interface WorkspacePreviewCardProps {
   id: string;
@@ -43,12 +43,7 @@ export function WorkspacePreviewCard({
         {description}
       </p>
 
-      <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
-        <div className="flex items-center gap-1.5 text-muted-foreground">
-          {/* TODO: Add resource count when backend supports it */}
-          <FileText className="h-3 w-3" />
-          <span className="text-[11px]">Resources</span>
-        </div>
+      <div className="flex items-center justify-end mt-auto pt-4 border-t border-white/5">
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Clock className="h-3 w-3" />
           <span className="text-[11px]">{lastUpdated}</span>

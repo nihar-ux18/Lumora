@@ -17,7 +17,6 @@ export function StatsGrid({ totalWorkspaces = 0 }: StatsGridProps) {
         icon="Folder"
         delay={0}
       />
-      {/* TODO: Add stats for Resources, AI Chats, and Quizzes once backend supports them */}
     </div>
   );
 }

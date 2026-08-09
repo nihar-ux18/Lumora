@@ -63,3 +63,8 @@ export const QUIZ = {
 export const ROADMAP = {
   GENERATE: (workspaceId: string) => `/roadmap/workspaces/${workspaceId}`,
 };
+
+export const FLASHCARDS = {
+  GENERATE: (workspaceId: string) => `/flashcards/workspaces/${workspaceId}`,
+};
+
