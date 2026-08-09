@@ -40,10 +40,16 @@ export function useLoginForm() {
     setServerError(null);
 
     try {
+      let redirectUrl: string | undefined;
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        redirectUrl = params.get("redirect") || undefined;
+      }
+
       await login({
         email: values.email,
         password: values.password,
-      });
+      }, redirectUrl);
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         setServerError(

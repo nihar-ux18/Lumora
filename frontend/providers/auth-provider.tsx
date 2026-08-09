@@ -26,7 +26,7 @@ interface AuthContextType {
   currentUser: UserResponse | null;
   isLoading: boolean;
   isAuthenticated: boolean;
-  login: (data: LoginRequest) => Promise<void>;
+  login: (data: LoginRequest, redirectUrl?: string) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
 }
@@ -70,15 +70,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const loginMutation = useMutation({
-    mutationFn: async (data: LoginRequest) => {
+    mutationFn: async (payload: { data: LoginRequest, redirectUrl?: string }) => {
       if (isMockAuthEnabled) {
         // DEVELOPMENT ONLY: Hardcoded mock credentials
-        if (data.email === "demo@lumora.dev" && data.password === "LumoraDemo123!") {
-          return { access_token: MOCK_TOKEN, token_type: "bearer" };
+        if (payload.data.email === "demo@lumora.dev" && payload.data.password === "LumoraDemo123!") {
+          return { access_token: MOCK_TOKEN, token_type: "bearer", redirectUrl: payload.redirectUrl };
         }
         throw new Error("Invalid mock credentials");
       }
-      return await authService.login(data);
+      const response = await authService.login(payload.data);
+      return { ...response, redirectUrl: payload.redirectUrl };
     },
     onSuccess: (data) => {
       if (typeof window !== "undefined") {
@@ -86,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       toast.success("Login successful");
-      router.push("/dashboard");
+      router.push(data.redirectUrl || "/dashboard");
     },
     onError: (error: unknown) => {
       let message = "Invalid email or password";
@@ -138,8 +139,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     currentUser,
     isLoading: !mounted || isUserLoading,
     isAuthenticated: !!currentUser,
-    login: async (data: LoginRequest) => {
-      await loginMutation.mutateAsync(data);
+    login: async (data: LoginRequest, redirectUrl?: string) => {
+      await loginMutation.mutateAsync({ data, redirectUrl });
     },
     register: async (data: RegisterRequest) => {
       await registerMutation.mutateAsync(data);
