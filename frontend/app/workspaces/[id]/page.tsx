@@ -24,6 +24,7 @@ import { UploadResourceDialog } from "@/components/resources/upload-resource-dia
 import { ResourceCard } from "@/components/resources/resource-card";
 import { DeleteResourceDialog } from "@/components/resources/delete-resource-dialog";
 import { toast } from "sonner";
+import Link from "next/link";
 import { useAuth } from "@/providers/auth-provider";
 import { WorkspaceMembersList } from "@/components/workspaces/workspace-members-list";
 import { InviteMemberDialog } from "@/components/workspaces/invite-member-dialog";
@@ -173,10 +174,10 @@ export default function WorkspaceDetailsPage() {
           </div>
           
           <div className="flex items-center gap-3 shrink-0">
-            <button className="flex items-center gap-2 rounded-[10px] bg-white/5 border border-white/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-white/10 transition-colors">
+            <Link href={`/workspaces/${workspaceId}/settings`} className="flex items-center gap-2 rounded-[10px] bg-white/5 border border-white/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-white/10 transition-colors">
               <Settings className="h-4 w-4 text-muted-foreground" />
               Settings
-            </button>
+            </Link>
             <button 
               onClick={() => setIsDeleteDialogOpen(true)}
               className="flex items-center gap-2 rounded-[10px] bg-red-500/10 border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { AppShell } from "@/components/app-shell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { chatService, MessageRole, ChatResponse, MessageResponse } from "@/services/chat.service";
+import { chatService, MessageRole, ChatResponse, MessageResponse, ChatSource } from "@/services/chat.service";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { MessageSquare, Send, Sparkles, Loader2, Plus, Trash2, Bot, User as UserIcon } from "lucide-react";
@@ -21,6 +21,7 @@ export default function AIChatPage() {
 
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [inputMessage, setInputMessage] = useState("");
+  const [sourcesMap, setSourcesMap] = useState<Record<string, ChatSource[]>>({});
 
   const { data: chats = [], isLoading: isChatsLoading } = useQuery({
     queryKey: ["chat-list", workspaceId],
@@ -92,6 +93,9 @@ export default function AIChatPage() {
         const filtered = (old || []).filter((msg) => !msg.id.startsWith("temp-"));
         return [...filtered, data.user_message, data.assistant_message];
       });
+      if (data.sources && data.sources.length > 0) {
+        setSourcesMap((prev) => ({ ...prev, [data.assistant_message.id]: data.sources }));
+      }
     },
     onError: (error, _, context) => {
       queryClient.setQueryData(["messages", activeChatId], context?.previousMessages);
@@ -216,19 +220,31 @@ export default function AIChatPage() {
                         key={msg.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`flex gap-4 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : ""}`}
+                        className={`flex gap-4 max-w-[85%] ${msg.role === "user" ? "ml-auto flex-row-reverse" : ""} ${msg.id.startsWith("temp-") ? "opacity-50 animate-pulse" : ""}`}
                       >
                         <div className={`shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
                           msg.role === "user" ? "bg-white/10 text-white" : "bg-[#4A00FF]/20 text-[#4A00FF]"
                         }`}>
                           {msg.role === "user" ? <UserIcon className="h-4 w-4" /> : <Bot className="h-4 w-4" />}
                         </div>
-                        <div className={`p-4 rounded-[16px] text-sm leading-relaxed ${
-                          msg.role === "user" 
-                            ? "bg-[#4A00FF] text-white rounded-tr-none" 
-                            : "bg-white/5 border border-white/10 text-foreground rounded-tl-none"
-                        }`}>
-                          {msg.content}
+                        <div className="flex flex-col gap-2 w-full">
+                          <div className={`p-4 rounded-[16px] text-sm leading-relaxed ${
+                            msg.role === "user" 
+                              ? "bg-[#4A00FF] text-white rounded-tr-none" 
+                              : "bg-white/5 border border-white/10 text-foreground rounded-tl-none"
+                          }`}>
+                            {msg.content}
+                          </div>
+                          
+                          {sourcesMap[msg.id] && sourcesMap[msg.id].length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {sourcesMap[msg.id].map((source, idx) => (
+                                <div key={idx} className="flex items-center gap-1.5 px-2.5 py-1 rounded-[8px] bg-[#4A00FF]/10 border border-[#4A00FF]/20 text-xs text-[#4A00FF]">
+                                  <span className="font-semibold">{source.resource_title}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     ))
