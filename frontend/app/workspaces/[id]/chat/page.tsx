@@ -6,11 +6,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { chatService, MessageRole, ChatResponse, MessageResponse } from "@/services/chat.service";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { MessageSquare, Send, Sparkles, Loader2, Plus, Trash2, ArrowLeft, Bot, User as UserIcon } from "lucide-react";
+import { MessageSquare, Send, Sparkles, Loader2, Plus, Trash2, Bot, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 import axios from "axios";
-import Link from "next/link";
+import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
+import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
 
 export default function AIChatPage() {
   const params = useParams();
@@ -114,13 +115,8 @@ export default function AIChatPage() {
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-7xl h-[calc(100vh-8rem)]">
-        <Link 
-          href={`/workspaces/${workspaceId}`}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Workspace
-        </Link>
+        <WorkspaceBreadcrumbs workspaceId={workspaceId} />
+        <WorkspaceNavigation workspaceId={workspaceId} />
         
         <div className="flex h-full rounded-[20px] bg-[#131316]/60 border border-white/10 overflow-hidden backdrop-blur-[20px]">
           

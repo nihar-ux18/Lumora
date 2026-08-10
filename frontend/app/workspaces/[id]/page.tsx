@@ -19,7 +19,6 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { DeleteWorkspaceDialog } from "@/components/workspaces/delete-workspace-dialog";
 import { UploadResourceDialog } from "@/components/resources/upload-resource-dialog";
 import { ResourceCard } from "@/components/resources/resource-card";
@@ -28,6 +27,8 @@ import { toast } from "sonner";
 import { useAuth } from "@/providers/auth-provider";
 import { WorkspaceMembersList } from "@/components/workspaces/workspace-members-list";
 import { InviteMemberDialog } from "@/components/workspaces/invite-member-dialog";
+import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
+import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
 import { UserPlus } from "lucide-react";
 
 export default function WorkspaceDetailsPage() {
@@ -148,13 +149,8 @@ export default function WorkspaceDetailsPage() {
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-7xl">
-        <Link 
-          href="/workspaces"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Workspaces
-        </Link>
+        <WorkspaceBreadcrumbs workspaceName={workspace.name} isLoading={isWorkspaceLoading} />
+        <WorkspaceNavigation workspaceId={workspace.id} />
         
         <motion.div
           initial={{ opacity: 0, y: 10 }}

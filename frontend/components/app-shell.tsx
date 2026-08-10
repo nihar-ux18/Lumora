@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Sidebar } from "./sidebar";
+import { MobileSidebar } from "./mobile-sidebar";
 import { TopNavbar } from "./top-navbar";
 import { PageContainer } from "./page-container";
 import { CommandMenu } from "./command-menu";
@@ -13,15 +14,25 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [isCommandMenuOpen, setIsCommandMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <ProtectedRoute>
       <div className="relative min-h-screen bg-[#0A0A0B] text-foreground font-sans antialiased">
-        {/* Fixed Sidebar */}
+        {/* Fixed Desktop Sidebar */}
         <Sidebar />
 
+        {/* Mobile Sidebar */}
+        <MobileSidebar 
+          isOpen={isMobileMenuOpen} 
+          onClose={() => setIsMobileMenuOpen(false)} 
+        />
+
         {/* Top Navbar */}
-        <TopNavbar onOpenCommandMenu={() => setIsCommandMenuOpen(true)} />
+        <TopNavbar 
+          onOpenCommandMenu={() => setIsCommandMenuOpen(true)} 
+          onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
+        />
 
         {/* Main Page Container */}
         <PageContainer>{children}</PageContainer>

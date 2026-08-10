@@ -6,10 +6,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { roadmapService, RoadmapResponse } from "@/services/roadmap.service";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { Map, Sparkles, Loader2, ArrowLeft, CheckCircle2, ChevronRight, PlayCircle } from "lucide-react";
+import { Map, Sparkles, Loader2, CheckCircle2, ChevronRight, PlayCircle } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
-import Link from "next/link";
+import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
+import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
 
 export default function RoadmapPage() {
   const params = useParams();
@@ -64,13 +65,8 @@ export default function RoadmapPage() {
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-4xl min-h-[calc(100vh-8rem)]">
-        <Link 
-          href={`/workspaces/${workspaceId}`}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Workspace
-        </Link>
+        <WorkspaceBreadcrumbs workspaceId={workspaceId} />
+        <WorkspaceNavigation workspaceId={workspaceId} />
         
         <div className="flex flex-col gap-6">
           <div className="rounded-[20px] bg-[#131316]/60 border border-white/10 p-6 backdrop-blur-[20px]">

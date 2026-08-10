@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { User, Settings, LogOut, ChevronDown, Sparkles } from "lucide-react";
+import { Settings, LogOut, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/providers/auth-provider";
+import { useRouter } from "next/navigation";
 
 export function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { currentUser, logout } = useAuth();
+  const router = useRouter();
 
-  const userName = currentUser?.fullname || "Guest User";
-  const userEmail = currentUser?.email || "guest@lumora.ai";
-  // Create initials from full name or email
+  const userName = currentUser?.fullname || "User";
+  const userEmail = currentUser?.email || "user@lumora.ai";
+  
   const initials = currentUser?.fullname
     ? currentUser.fullname
         .split(" ")
@@ -20,7 +22,7 @@ export function UserMenu() {
         .join("")
         .substring(0, 2)
         .toUpperCase()
-    : "GU";
+    : "US";
 
   return (
     <div className="relative">
@@ -64,27 +66,14 @@ export function UserMenu() {
 
               {/* Menu Actions */}
               <button
-                onClick={() => setIsOpen(false)}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-foreground hover:bg-white/5 transition-colors"
-              >
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span>Profile Settings</span>
-              </button>
-
-              <button
-                onClick={() => setIsOpen(false)}
-                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-foreground hover:bg-white/5 transition-colors"
-              >
-                <Sparkles className="h-4 w-4 text-[#4A00FF]" />
-                <span>Upgrade Plan</span>
-              </button>
-
-              <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  router.push("/settings");
+                }}
                 className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs text-foreground hover:bg-white/5 transition-colors"
               >
                 <Settings className="h-4 w-4 text-muted-foreground" />
-                <span>Preferences</span>
+                <span>Profile Settings</span>
               </button>
 
               <div className="border-t border-white/10 my-1" />

@@ -6,13 +6,12 @@ import { motion } from "framer-motion";
 import {
   Home,
   Folder,
-  Sparkles,
-  BookOpen,
   Settings,
   Zap,
   ChevronRight,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useAuth } from "@/providers/auth-provider";
 
 interface NavItem {
   name: string;
@@ -22,18 +21,29 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { name: "Home", href: "/", icon: Home },
+  { name: "Dashboard", href: "/dashboard", icon: Home },
   { name: "Workspaces", href: "/workspaces", icon: Folder },
-  { name: "AI Chat", href: "/chat", icon: Sparkles, badge: "AI" },
-  { name: "Resources", href: "/summary", icon: BookOpen },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { currentUser } = useAuth();
+
+  const userName = currentUser?.fullname || "User";
+  const userEmail = currentUser?.email || "user@lumora.ai";
+  
+  const initials = currentUser?.fullname
+    ? currentUser.fullname
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase()
+    : "US";
 
   return (
-    <aside className="fixed top-0 left-0 bottom-0 z-40 flex w-[260px] flex-col justify-between bg-[#131316]/60 border-r border-white/10 backdrop-blur-[20px]">
+    <aside className="fixed top-0 left-0 bottom-0 z-40 hidden md:flex w-[260px] flex-col justify-between bg-[#131316]/60 border-r border-white/10 backdrop-blur-[20px]">
       {/* Top Header & Logo */}
       <div className="flex flex-col">
         <div className="flex h-16 items-center gap-3 px-6 border-b border-white/10">
@@ -101,27 +111,29 @@ export function Sidebar() {
 
       {/* Bottom Profile Section */}
       <div className="p-4 border-t border-white/10">
-        <motion.div
-          whileHover={{ scale: 1.01 }}
-          className="flex items-center justify-between rounded-[12px] bg-white/5 p-2.5 border border-white/5 hover:border-white/10 transition-colors cursor-pointer"
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <Avatar className="h-8 w-8 border border-white/10 shrink-0">
-              <AvatarFallback className="bg-[#4A00FF] text-white text-xs font-semibold">
-                AM
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs font-semibold text-foreground truncate">
-                Alex Morgan
-              </span>
-              <span className="text-[10px] text-muted-foreground truncate">
-                Pro Plan
-              </span>
+        <Link href="/settings">
+          <motion.div
+            whileHover={{ scale: 1.01 }}
+            className="flex items-center justify-between rounded-[12px] bg-white/5 p-2.5 border border-white/5 hover:border-white/10 transition-colors cursor-pointer"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <Avatar className="h-8 w-8 border border-white/10 shrink-0">
+                <AvatarFallback className="bg-[#4A00FF] text-white text-xs font-semibold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col min-w-0">
+                <span className="text-xs font-semibold text-foreground truncate">
+                  {userName}
+                </span>
+                <span className="text-[10px] text-muted-foreground truncate">
+                  {userEmail}
+                </span>
+              </div>
             </div>
-          </div>
-          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-        </motion.div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+          </motion.div>
+        </Link>
       </div>
     </aside>
   );

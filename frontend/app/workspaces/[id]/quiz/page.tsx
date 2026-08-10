@@ -6,10 +6,11 @@ import { useMutation } from "@tanstack/react-query";
 import { quizService, QuizQuestion, QuizSubmissionResponse } from "@/services/quiz.service";
 import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, Sparkles, Loader2, ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { Brain, Sparkles, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
-import Link from "next/link";
+import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
+import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
 
 export default function QuizPage() {
   const params = useParams();
@@ -95,13 +96,8 @@ export default function QuizPage() {
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-4xl min-h-[calc(100vh-8rem)]">
-        <Link 
-          href={`/workspaces/${workspaceId}`}
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Workspace
-        </Link>
+        <WorkspaceBreadcrumbs workspaceId={workspaceId} />
+        <WorkspaceNavigation workspaceId={workspaceId} />
         
         <div className="flex flex-col gap-6">
           
