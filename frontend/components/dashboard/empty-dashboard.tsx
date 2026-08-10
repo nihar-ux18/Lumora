@@ -42,10 +42,6 @@ export function EmptyDashboard({ onCreateWorkspace }: EmptyDashboardProps = {}) 
             <FolderPlus className="h-4 w-4" />
             Create Workspace
           </button>
-          <button className="flex items-center justify-center gap-2.5 h-11 px-6 rounded-[12px] bg-white/5 border border-white/10 text-sm font-medium text-foreground hover:bg-white/10 transition-colors w-full sm:w-auto">
-            <FileUp className="h-4 w-4 text-muted-foreground" />
-            Import Data
-          </button>
         </div>
       </motion.div>
 

@@ -19,71 +19,99 @@ import { CreateWorkspaceDialog } from "@/components/workspaces/create-workspace-
 export default function DashboardPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const { 
-    data: workspaces = [], 
-    isLoading, 
-    isError, 
-    refetch 
+  const {
+    data: workspaces = [],
+    isLoading,
+    isError,
+    refetch,
   } = useQuery({
     queryKey: ["workspaces"],
     queryFn: workspaceService.listWorkspaces,
   });
 
-  const sortedWorkspaces = [...workspaces].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  // Remove duplicate workspaces by ID before rendering.
+  const uniqueWorkspaces = Array.from(
+    new Map(workspaces.map((workspace) => [workspace.id, workspace])).values()
+  );
+
+  const sortedWorkspaces = [...uniqueWorkspaces].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() -
+      new Date(a.created_at).getTime()
   );
 
   const recentWorkspaces = sortedWorkspaces.slice(0, 4);
-  const isEmpty = workspaces.length === 0;
+  const isEmpty = uniqueWorkspaces.length === 0;
 
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="space-y-6">
+        <DashboardHeader />
+
         {isLoading ? (
           <DashboardSkeleton />
         ) : isError ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-            <h2 className="text-lg font-semibold text-foreground mb-2">Failed to load workspaces</h2>
-            <button 
+          <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-white/5 bg-[#131316]/40 p-8 text-center">
+            <AlertCircle className="mb-3 h-8 w-8 text-red-400" />
+
+            <h2 className="text-base font-semibold text-foreground">
+              Failed to load workspaces
+            </h2>
+
+            <p className="mt-1 text-sm text-muted-foreground">
+              Something went wrong while loading your workspaces.
+            </p>
+
+            <button
               onClick={() => refetch()}
-              className="rounded-lg bg-[#4A00FF] px-4 py-2 text-sm font-medium text-white hover:bg-[#5A14FF]"
+              className="mt-4 rounded-lg bg-[#4A00FF] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#5A14FF]"
             >
               Try Again
             </button>
           </div>
         ) : isEmpty ? (
-          <EmptyDashboard onCreateWorkspace={() => setIsCreateModalOpen(true)} />
+          <EmptyDashboard
+            onCreateWorkspace={() => setIsCreateModalOpen(true)}
+          />
         ) : (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <DashboardHeader />
-            <StatsGrid totalWorkspaces={workspaces.length} />
-            <QuickActions onCreateWorkspace={() => setIsCreateModalOpen(true)} />
-            
+            <StatsGrid />
+
+            <QuickActions
+              onCreateWorkspace={() => setIsCreateModalOpen(true)}
+            />
+
             <div className="mt-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-semibold tracking-wide text-foreground">
                   Recent Workspaces
                 </h2>
-                <Link 
+
+                <Link
                   href="/workspaces"
-                  className="text-xs font-medium text-[#4A00FF] hover:text-[#5A14FF] transition-colors"
+                  className="text-xs font-medium text-[#4A00FF] transition-colors hover:text-[#5A14FF]"
                 >
                   View all
                 </Link>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {recentWorkspaces.map((workspace, index) => (
-                  <Link href={`/workspaces/${workspace.id}`} key={workspace.id} className="block outline-none">
+                  <Link
+                    href={`/workspaces/${workspace.id}`}
+                    key={workspace.id}
+                    className="block outline-none"
+                  >
                     <WorkspacePreviewCard
                       id={workspace.id}
                       title={workspace.name}
-                      description={workspace.description || "No description provided."}
+                      description={
+                        workspace.description || "No description provided."
+                      }
                       lastUpdated={formatDate(workspace.updated_at)}
                       color={getDeterministicColor(workspace.id)}
                       delay={0.1 + index * 0.1}
@@ -96,9 +124,9 @@ export default function DashboardPage() {
         )}
       </div>
 
-      <CreateWorkspaceDialog 
-        isOpen={isCreateModalOpen} 
-        onClose={() => setIsCreateModalOpen(false)} 
+      <CreateWorkspaceDialog
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
       />
     </AppShell>
   );

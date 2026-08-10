@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { WorkspacePreviewCard } from "@/components/dashboard/workspace-preview-card";
-import { DashboardSkeleton } from "@/components/dashboard/dashboard-skeleton";
+import { WorkspacesSkeleton } from "@/components/dashboard/workspaces-skeleton";
 import { CreateWorkspaceDialog } from "@/components/workspaces/create-workspace-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { workspaceService } from "@/services/workspace.service";
@@ -70,7 +70,7 @@ export default function WorkspacesPage() {
         </div>
 
         {isLoading ? (
-          <DashboardSkeleton />
+          <WorkspacesSkeleton />
         ) : isError ? (
           <div className="flex flex-col items-center justify-center py-20 rounded-[16px] bg-[#131316]/40 border border-white/5">
             <AlertCircle className="h-10 w-10 text-red-500 mb-4" />

@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { FolderPlus, Loader2, X, AlignLeft } from "lucide-react";
 import axios, { AxiosError } from "axios";
 
+import { useRouter } from "next/navigation";
+
 interface CreateWorkspaceDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -25,6 +27,7 @@ type FormValues = z.infer<typeof createWorkspaceSchema>;
 
 export function CreateWorkspaceDialog({ isOpen, onClose }: CreateWorkspaceDialogProps) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -45,11 +48,12 @@ export function CreateWorkspaceDialog({ isOpen, onClose }: CreateWorkspaceDialog
 
   const mutation = useMutation({
     mutationFn: (data: WorkspaceCreate) => workspaceService.createWorkspace(data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast.success("Workspace created successfully");
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
       reset();
       onClose();
+      router.push(`/workspaces/${data.id}`);
     },
     onError: (error: Error | AxiosError) => {
       let msg = "Failed to create workspace";
