@@ -64,29 +64,30 @@ export default function FlashcardsPage() {
               </div>
             </div>
 
-            <form onSubmit={handleGenerate} className="flex items-center gap-4 mt-6 flex-wrap">
+            <form onSubmit={handleGenerate} className="flex flex-col sm:flex-row sm:items-center gap-4 mt-6">
               <input
                 type="text"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="What topic would you like to review?"
                 disabled={generateMutation.isPending}
-                className="flex-1 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 min-w-[200px]"
+                className="flex-1 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 w-full"
               />
-              <input
-                type="number"
-                min="1"
-                max="50"
-                value={numCards}
-                onChange={(e) => setNumCards(Number(e.target.value))}
-                disabled={generateMutation.isPending}
-                className="w-24 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50"
-              />
-              <button
-                type="submit"
-                disabled={!topic.trim() || generateMutation.isPending}
-                className="flex items-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50"
-              >
+              <div className="flex items-center gap-4 w-full sm:w-auto">
+                <input
+                  type="number"
+                  min="1"
+                  max="50"
+                  value={numCards}
+                  onChange={(e) => setNumCards(Number(e.target.value))}
+                  disabled={generateMutation.isPending}
+                  className="w-24 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 text-center shrink-0"
+                />
+                <button
+                  type="submit"
+                  disabled={!topic.trim() || generateMutation.isPending}
+                  className="flex flex-1 items-center justify-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50 whitespace-nowrap"
+                >
                 {generateMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
@@ -94,7 +95,8 @@ export default function FlashcardsPage() {
                 )}
                 {generateMutation.isPending ? "Generating..." : "Generate"}
               </button>
-            </form>
+            </div>
+          </form>
           </div>
 
           <div className="flex-1 rounded-[20px] bg-[#131316]/60 border border-white/10 p-8 backdrop-blur-[20px] min-h-[400px]">

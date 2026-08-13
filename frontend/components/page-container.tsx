@@ -10,7 +10,7 @@ interface PageContainerProps {
 
 export function PageContainer({ children, className = "" }: PageContainerProps) {
   return (
-    <main className="ml-[260px] pt-16 min-h-screen flex-1 bg-[#0A0A0B] text-foreground overflow-y-auto">
+    <main className="md:ml-[260px] ml-0 pt-16 min-h-screen flex-1 bg-[#0A0A0B] text-foreground overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}

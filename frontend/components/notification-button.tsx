@@ -47,7 +47,7 @@ export function NotificationButton({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
-              className="absolute right-0 mt-2 z-50 w-80 overflow-hidden rounded-[16px] border border-white/10 bg-[#131316]/90 p-4 shadow-2xl backdrop-blur-[20px]"
+              className="absolute right-0 mt-2 z-50 w-[calc(100vw-2rem)] sm:w-80 max-w-xs overflow-hidden rounded-[16px] border border-white/10 bg-[#131316]/90 p-4 shadow-2xl backdrop-blur-[20px]"
             >
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <h4 className="text-xs font-semibold text-foreground">Notifications</h4>

@@ -79,7 +79,7 @@ export default function DashboardPage() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <StatsGrid />
+            <StatsGrid totalWorkspaces={uniqueWorkspaces.length} />
 
             <QuickActions
               onCreateWorkspace={() => setIsCreateModalOpen(true)}

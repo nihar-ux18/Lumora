@@ -138,7 +138,8 @@ export default function SettingsPage() {
                         placeholder="Enter your full name"
                         required
                         minLength={2}
-                        className="w-full h-11 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors"
+                        className="w-full h-11 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={updateProfileMutation.isPending}
                       />
                     </div>
                     

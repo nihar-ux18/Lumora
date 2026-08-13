@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { chatService, MessageRole, ChatResponse, MessageResponse, ChatSource } from "@/services/chat.service";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
-import { MessageSquare, Send, Sparkles, Loader2, Plus, Trash2, Bot, User as UserIcon } from "lucide-react";
+import { MessageSquare, Send, Sparkles, Loader2, Plus, Trash2, Bot, User as UserIcon, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { formatDate } from "@/lib/utils";
 import axios from "axios";
@@ -125,7 +125,7 @@ export default function AIChatPage() {
         <div className="flex h-full rounded-[20px] bg-[#131316]/60 border border-white/10 overflow-hidden backdrop-blur-[20px]">
           
           {/* Chat List Sidebar */}
-          <div className="w-[300px] border-r border-white/10 flex flex-col bg-white/5">
+          <div className={`${activeChatId ? "hidden md:flex" : "flex"} w-full md:w-[300px] border-r border-white/10 flex-col bg-white/5`}>
             <div className="p-4 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-foreground flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-[#4A00FF]" />
@@ -184,7 +184,7 @@ export default function AIChatPage() {
           </div>
 
           {/* Chat Area */}
-          <div className="flex-1 flex flex-col relative">
+          <div className={`${!activeChatId ? "hidden md:flex" : "flex"} flex-1 flex-col relative`}>
             {!activeChatId ? (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
                 <div className="h-16 w-16 bg-[#4A00FF]/10 rounded-full flex items-center justify-center mb-6 shadow-lg shadow-[#4A00FF]/20">
@@ -205,6 +205,26 @@ export default function AIChatPage() {
               </div>
             ) : (
               <>
+                {/* Mobile Active Chat Header */}
+                <div className="p-4 border-b border-white/10 flex items-center justify-between bg-white/5 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setActiveChatId(null)}
+                      className="md:hidden p-1.5 rounded-lg text-muted-foreground hover:bg-white/5 hover:text-foreground transition-colors mr-1"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </button>
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground">
+                        {chats.find((c) => c.id === activeChatId)?.title || "Chat Session"}
+                      </h3>
+                      <p className="text-[10px] text-muted-foreground">
+                        AI Assistant
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
                   {isMessagesLoading ? (
                     <div className="flex items-center justify-center h-full">

@@ -64,7 +64,7 @@ export default function SummaryPage() {
               </div>
             </div>
 
-            <form onSubmit={handleGenerate} className="flex items-center gap-4 mt-6">
+            <form onSubmit={handleGenerate} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mt-6">
               <input
                 type="text"
                 value={topic}
@@ -76,7 +76,7 @@ export default function SummaryPage() {
               <button
                 type="submit"
                 disabled={!topic.trim() || generateMutation.isPending}
-                className="flex items-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50"
+                className="flex items-center justify-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50 w-full sm:w-auto shrink-0"
               >
                 {generateMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

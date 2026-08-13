@@ -95,7 +95,7 @@ export function InviteMemberDialog({ isOpen, onClose, workspaceId }: InviteMembe
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed left-1/2 top-1/2 z-[70] w-full max-w-md -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] bg-[#0A0A0B] border border-white/10 shadow-2xl"
+            className="fixed left-1/2 top-1/2 z-[70] w-[calc(100%-2rem)] sm:w-full sm:max-w-md -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-[20px] bg-[#0A0A0B] border border-white/10 shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-white/5 px-6 py-4">
               <h2 className="text-sm font-semibold tracking-wide text-foreground flex items-center gap-2">
