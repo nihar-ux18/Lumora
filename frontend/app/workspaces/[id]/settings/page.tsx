@@ -1,14 +1,15 @@
 "use client";
 
-import axios from "axios";
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/app-shell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { workspaceService, WorkspaceUpdate } from "@/services/workspace.service";
-import { AlertCircle, Loader2, Save } from "lucide-react";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { motion } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { getErrorMessage } from "@/lib/utils";
+import { ErrorState } from "@/components/ui/error-state";
 import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
 import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
 
@@ -17,13 +18,13 @@ export default function WorkspaceSettingsPage() {
   const router = useRouter();
   const workspaceId = params.id as string;
   const queryClient = useQueryClient();
-  
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  const { 
-    data: workspace, 
-    isLoading: isWorkspaceLoading, 
+  const {
+    data: workspace,
+    isLoading: isWorkspaceLoading,
     error: workspaceError,
     refetch: refetchWorkspace
   } = useQuery({
@@ -49,13 +50,7 @@ export default function WorkspaceSettingsPage() {
       toast.success("Workspace updated successfully");
     },
     onError: (error: unknown) => {
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        toast.error(error.response.data.detail);
-      } else if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to update workspace");
-      }
+      toast.error(getErrorMessage(error, "Failed to update workspace"));
     }
   });
 
@@ -87,26 +82,19 @@ export default function WorkspaceSettingsPage() {
     return (
       <AppShell>
         <div className="mx-auto w-full max-w-7xl">
-          <button 
+          <button
             onClick={() => router.push("/workspaces")}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
           >
+            <ArrowLeft className="h-4 w-4" />
             Back to Workspaces
           </button>
-          
-          <div className="flex flex-col items-center justify-center py-20 rounded-[16px] bg-[#131316]/40 border border-white/5 text-center">
-            <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-            <h2 className="text-lg font-semibold text-foreground mb-2">Workspace Not Found</h2>
-            <p className="text-sm text-muted-foreground mb-6 max-w-sm">
-              The workspace you are looking for might have been deleted or you don&apos;t have access to it.
-            </p>
-            <button 
-              onClick={() => refetchWorkspace()}
-              className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-white/15"
-            >
-              Try Again
-            </button>
-          </div>
+
+          <ErrorState
+            error={workspaceError}
+            onRetry={refetchWorkspace}
+            title="Workspace Load Failed"
+          />
         </div>
       </AppShell>
     );
@@ -117,7 +105,7 @@ export default function WorkspaceSettingsPage() {
       <div className="mx-auto w-full max-w-7xl">
         <WorkspaceBreadcrumbs workspaceName={workspace.name} isLoading={isWorkspaceLoading} />
         <WorkspaceNavigation workspaceId={workspace.id} />
-        
+
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

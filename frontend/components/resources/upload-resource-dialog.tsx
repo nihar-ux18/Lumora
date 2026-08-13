@@ -8,7 +8,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { resourceService, ResourceType } from "@/services/resource.service";
 import { toast } from "sonner";
 import { FileUp, Loader2, X, Link as LinkIcon, FileText, Image as ImageIcon, AlignLeft } from "lucide-react";
-import axios, { AxiosError, AxiosProgressEvent } from "axios";
+import { type AxiosProgressEvent } from "axios";
+import { getErrorMessage } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const uploadSchema = z.object({
@@ -100,20 +101,8 @@ export function UploadResourceDialog({ isOpen, onClose, workspaceId }: UploadRes
       setUploadProgress(0);
       onClose();
     },
-    onError: (error: Error | AxiosError) => {
-      let msg = "Failed to add resource";
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const data = error.response.data as { detail?: unknown };
-        const detail = data.detail;
-        if (Array.isArray(detail)) {
-          msg = detail.map((err: { msg: string }) => err.msg).join(", ");
-        } else if (typeof detail === "string") {
-          msg = detail;
-        }
-      } else {
-        msg = error.message || msg;
-      }
-      toast.error(msg);
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Failed to add resource"));
       setUploadProgress(0);
     },
   });

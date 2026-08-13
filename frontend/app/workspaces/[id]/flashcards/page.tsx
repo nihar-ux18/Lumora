@@ -7,7 +7,7 @@ import { flashcardService, FlashcardResponse, Flashcard } from "@/services/flash
 import { useParams } from "next/navigation";
 import { BookOpen, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
+import { getErrorMessage } from "@/lib/utils";
 import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
 import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
 
@@ -29,13 +29,7 @@ export default function FlashcardsPage() {
       toast.success("Flashcards generated successfully");
     },
     onError: (error) => {
-      let msg = "Failed to generate flashcards";
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        msg = Array.isArray(error.response.data.detail) 
-          ? error.response.data.detail.map((e: { msg: string }) => e.msg).join(", ") 
-          : error.response.data.detail;
-      }
-      toast.error(msg);
+      toast.error(getErrorMessage(error, "Failed to generate flashcards"));
     },
     retry: false,
   });

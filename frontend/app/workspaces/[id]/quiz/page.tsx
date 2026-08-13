@@ -8,7 +8,7 @@ import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, Sparkles, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
+import { getErrorMessage } from "@/lib/utils";
 import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
 import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
 
@@ -36,13 +36,7 @@ export default function QuizPage() {
     },
     onError: (error) => {
       setQuizState("idle");
-      let msg = "Failed to generate quiz";
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        msg = Array.isArray(error.response.data.detail) 
-          ? error.response.data.detail.map((e: { msg: string }) => e.msg).join(", ") 
-          : error.response.data.detail;
-      }
-      toast.error(msg);
+      toast.error(getErrorMessage(error, "Failed to generate quiz"));
     },
     retry: false,
   });
@@ -55,9 +49,9 @@ export default function QuizPage() {
       setQuizState("results");
       toast.success("Quiz evaluated successfully");
     },
-    onError: () => {
+    onError: (error) => {
       setQuizState("playing");
-      toast.error("Failed to submit quiz");
+      toast.error(getErrorMessage(error, "Failed to submit quiz"));
     }
   });
 

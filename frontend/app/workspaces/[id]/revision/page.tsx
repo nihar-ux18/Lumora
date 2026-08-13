@@ -8,7 +8,7 @@ import { useParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lightbulb, Sparkles, Loader2, ChevronRight, ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
+import { getErrorMessage } from "@/lib/utils";
 import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
 import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
 
@@ -30,13 +30,7 @@ export default function RevisionPage() {
       toast.success("Revision cards generated successfully");
     },
     onError: (error) => {
-      let msg = "Failed to generate revision cards";
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        msg = Array.isArray(error.response.data.detail) 
-          ? error.response.data.detail.map((e: { msg: string }) => e.msg).join(", ") 
-          : error.response.data.detail;
-      }
-      toast.error(msg);
+      toast.error(getErrorMessage(error, "Failed to generate revision cards"));
     },
     retry: false,
   });

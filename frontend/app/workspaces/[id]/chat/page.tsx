@@ -8,8 +8,8 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { MessageSquare, Send, Sparkles, Loader2, Plus, Trash2, Bot, User as UserIcon, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { formatDate } from "@/lib/utils";
-import axios from "axios";
+import { formatDate, getErrorMessage } from "@/lib/utils";
+import { ErrorState } from "@/components/ui/error-state";
 import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
 import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
 
@@ -23,12 +23,23 @@ export default function AIChatPage() {
   const [inputMessage, setInputMessage] = useState("");
   const [sourcesMap, setSourcesMap] = useState<Record<string, ChatSource[]>>({});
 
-  const { data: chats = [], isLoading: isChatsLoading } = useQuery({
+  const {
+    data: chats = [],
+    isLoading: isChatsLoading,
+    isError: isChatsError,
+    refetch: refetchChats
+  } = useQuery({
     queryKey: ["chat-list", workspaceId],
     queryFn: () => chatService.listChats(workspaceId),
   });
 
-  const { data: messages = [], isLoading: isMessagesLoading } = useQuery({
+  const {
+    data: messages = [],
+    isLoading: isMessagesLoading,
+    isError: isMessagesError,
+    error: messagesError,
+    refetch: refetchMessages
+  } = useQuery({
     queryKey: ["messages", activeChatId],
     queryFn: () => chatService.listMessages(activeChatId!),
     enabled: !!activeChatId,
@@ -47,13 +58,7 @@ export default function AIChatPage() {
       setActiveChatId(newChat.id);
     },
     onError: (error) => {
-      let msg = "Failed to create chat";
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        msg = Array.isArray(error.response.data.detail) 
-          ? error.response.data.detail.map((e: { msg: string }) => e.msg).join(", ") 
-          : error.response.data.detail;
-      }
-      toast.error(msg);
+      toast.error(getErrorMessage(error, "Failed to create chat"));
     }
   });
 
@@ -66,7 +71,7 @@ export default function AIChatPage() {
       }
       toast.success("Chat deleted");
     },
-    onError: () => toast.error("Failed to delete chat"),
+    onError: (error) => toast.error(getErrorMessage(error, "Failed to delete chat")),
   });
 
   const sendMessageMutation = useMutation({
@@ -99,13 +104,7 @@ export default function AIChatPage() {
     },
     onError: (error, _, context) => {
       queryClient.setQueryData(["messages", activeChatId], context?.previousMessages);
-      let msg = "Something went wrong.";
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        msg = Array.isArray(error.response.data.detail) 
-          ? error.response.data.detail.map((e: { msg: string }) => e.msg).join(", ") 
-          : error.response.data.detail;
-      }
-      toast.error(msg);
+      toast.error(getErrorMessage(error, "Failed to send message"));
     },
   });
 
@@ -121,9 +120,9 @@ export default function AIChatPage() {
       <div className="mx-auto w-full max-w-7xl h-[calc(100vh-8rem)]">
         <WorkspaceBreadcrumbs workspaceId={workspaceId} />
         <WorkspaceNavigation workspaceId={workspaceId} />
-        
+
         <div className="flex h-full rounded-[20px] bg-[#131316]/60 border border-white/10 overflow-hidden backdrop-blur-[20px]">
-          
+
           {/* Chat List Sidebar */}
           <div className={`${activeChatId ? "hidden md:flex" : "flex"} w-full md:w-[300px] border-r border-white/10 flex-col bg-white/5`}>
             <div className="p-4 border-b border-white/10 flex items-center justify-between">
@@ -131,7 +130,7 @@ export default function AIChatPage() {
                 <MessageSquare className="h-4 w-4 text-[#4A00FF]" />
                 Conversations
               </h2>
-              <button 
+              <button
                 onClick={() => createChatMutation.mutate()}
                 disabled={createChatMutation.isPending}
                 className="h-8 w-8 rounded-[8px] bg-[#4A00FF]/20 text-[#4A00FF] flex items-center justify-center hover:bg-[#4A00FF]/30 transition-colors disabled:opacity-50"
@@ -139,7 +138,7 @@ export default function AIChatPage() {
                 {createChatMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               </button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
               {isChatsLoading ? (
                 <div className="animate-pulse space-y-2">
@@ -147,13 +146,23 @@ export default function AIChatPage() {
                     <div key={i} className="h-14 bg-white/5 rounded-[10px]" />
                   ))}
                 </div>
+              ) : isChatsError ? (
+                <div className="p-4 text-center">
+                  <p className="text-xs text-red-500 mb-2">Failed to load chats</p>
+                  <button
+                    onClick={() => refetchChats()}
+                    className="text-[10px] text-[#4A00FF] hover:underline animate-pulse"
+                  >
+                    Retry
+                  </button>
+                </div>
               ) : chats.length === 0 ? (
                 <div className="text-center py-10">
                   <p className="text-xs text-muted-foreground">No conversations yet.</p>
                 </div>
               ) : (
                 chats.map((chat) => (
-                  <div 
+                  <div
                     key={chat.id}
                     onClick={() => setActiveChatId(chat.id)}
                     className={`group cursor-pointer relative flex items-center justify-between p-3 rounded-[10px] transition-colors ${
@@ -168,7 +177,7 @@ export default function AIChatPage() {
                         {formatDate(chat.created_at)}
                       </span>
                     </div>
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         deleteChatMutation.mutate(chat.id);
@@ -230,13 +239,17 @@ export default function AIChatPage() {
                     <div className="flex items-center justify-center h-full">
                       <Loader2 className="h-6 w-6 animate-spin text-[#4A00FF]" />
                     </div>
+                  ) : isMessagesError ? (
+                    <div className="flex items-center justify-center h-full">
+                      <ErrorState error={messagesError} onRetry={refetchMessages} />
+                    </div>
                   ) : messages.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                       No messages yet. Send a message to start!
                     </div>
                   ) : (
                     messages.map((msg) => (
-                      <motion.div 
+                      <motion.div
                         key={msg.id}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -249,13 +262,13 @@ export default function AIChatPage() {
                         </div>
                         <div className="flex flex-col gap-2 w-full">
                           <div className={`p-4 rounded-[16px] text-sm leading-relaxed ${
-                            msg.role === "user" 
-                              ? "bg-[#4A00FF] text-white rounded-tr-none" 
+                            msg.role === "user"
+                              ? "bg-[#4A00FF] text-white rounded-tr-none"
                               : "bg-white/5 border border-white/10 text-foreground rounded-tl-none"
                           }`}>
                             {msg.content}
                           </div>
-                          
+
                           {sourcesMap[msg.id] && sourcesMap[msg.id].length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-1">
                               {sourcesMap[msg.id].map((source, idx) => (
@@ -271,7 +284,7 @@ export default function AIChatPage() {
                   )}
 
                   {sendMessageMutation.isPending && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="flex gap-4 max-w-[85%]"

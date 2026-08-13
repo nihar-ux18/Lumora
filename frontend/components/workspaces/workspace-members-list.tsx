@@ -5,8 +5,8 @@ import { motion } from "framer-motion";
 import { User, MoreVertical, Trash2, Shield, ShieldAlert, Loader2 } from "lucide-react";
 import { WorkspaceMemberResponse, WorkspaceRole, workspaceService } from "@/services/workspace.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
-import axios from "axios";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,11 +48,7 @@ export function WorkspaceMembersList({ workspaceId, members, currentUserId, isOw
       toast.success("Member role updated");
     },
     onError: (error) => {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.detail || "Failed to update member role");
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      toast.error(getErrorMessage(error, "Failed to update member role"));
     },
     onSettled: () => setLoadingMemberId(null),
   });
@@ -65,11 +61,7 @@ export function WorkspaceMembersList({ workspaceId, members, currentUserId, isOw
       toast.success("Member removed successfully");
     },
     onError: (error) => {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.detail || "Failed to remove member");
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      toast.error(getErrorMessage(error, "Failed to remove member"));
     },
     onSettled: () => setLoadingMemberId(null),
   });

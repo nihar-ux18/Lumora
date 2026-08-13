@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { workspaceService } from "@/services/workspace.service";
 import { toast } from "sonner";
 import { UserPlus, Loader2, X, Mail, Copy, Check } from "lucide-react";
-import axios from "axios";
+import { getErrorMessage } from "@/lib/utils";
 
 interface InviteMemberDialogProps {
   isOpen: boolean;
@@ -53,11 +53,7 @@ export function InviteMemberDialog({ isOpen, onClose, workspaceId }: InviteMembe
       queryClient.invalidateQueries({ queryKey: ["workspace-members", workspaceId] });
     },
     onError: (error) => {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.detail || "Failed to invite member");
-      } else {
-        toast.error("An unexpected error occurred");
-      }
+      toast.error(getErrorMessage(error, "Failed to invite member"));
     },
   });
 

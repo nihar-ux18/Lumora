@@ -7,14 +7,21 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersService } from "@/services/users.service";
 import { Loader2, Upload, User as UserIcon, Save } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
 import Image from "next/image";
+import { getErrorMessage } from "@/lib/utils";
+import { ErrorState } from "@/components/ui/error-state";
 
 export default function SettingsPage() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { data: user, isLoading } = useQuery({
+  const {
+    data: user,
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useQuery({
     queryKey: ["currentUser"],
     queryFn: usersService.getMe,
   });
@@ -35,13 +42,7 @@ export default function SettingsPage() {
       toast.success("Profile updated successfully");
     },
     onError: (error) => {
-      let msg = "Failed to update profile";
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        msg = Array.isArray(error.response.data.detail) 
-          ? error.response.data.detail.map((e: { msg: string }) => e.msg).join(", ") 
-          : error.response.data.detail;
-      }
-      toast.error(msg);
+      toast.error(getErrorMessage(error, "Failed to update profile"));
     },
   });
 
@@ -52,13 +53,7 @@ export default function SettingsPage() {
       toast.success("Avatar updated successfully");
     },
     onError: (error) => {
-      let msg = "Failed to upload avatar";
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        msg = Array.isArray(error.response.data.detail) 
-          ? error.response.data.detail.map((e: { msg: string }) => e.msg).join(", ") 
-          : error.response.data.detail;
-      }
-      toast.error(msg);
+      toast.error(getErrorMessage(error, "Failed to upload avatar"));
     },
   });
 
@@ -85,20 +80,22 @@ export default function SettingsPage() {
             <div className="flex items-center justify-center py-20">
               <Loader2 className="h-8 w-8 text-[#4A00FF] animate-spin" />
             </div>
+          ) : isError ? (
+            <ErrorState error={error} onRetry={refetch} />
           ) : (
             <div className="space-y-8">
               {/* Profile Section */}
               <div className="rounded-[20px] bg-[#131316]/60 border border-white/10 p-8 backdrop-blur-[20px]">
                 <h2 className="text-lg font-semibold text-foreground mb-6">Profile Details</h2>
-                
+
                 <div className="flex flex-col md:flex-row gap-8">
                   <div className="flex flex-col items-center gap-4">
                     <div className="relative h-24 w-24 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
                       {user?.avatar_url ? (
-                        <Image 
-                          src={user.avatar_url} 
-                          alt="Avatar" 
-                          fill 
+                        <Image
+                          src={user.avatar_url}
+                          alt="Avatar"
+                          fill
                           className="object-cover"
                         />
                       ) : (
@@ -142,7 +139,7 @@ export default function SettingsPage() {
                         disabled={updateProfileMutation.isPending}
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-foreground">Email</label>
                       <input

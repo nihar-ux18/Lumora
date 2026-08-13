@@ -6,17 +6,17 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { workspaceService } from "@/services/workspace.service";
 import { resourceService } from "@/services/resource.service";
 import { formatDate, getDeterministicColor } from "@/lib/utils";
-import { 
-  AlertCircle, 
-  Folder, 
-  Calendar, 
-  Settings, 
-  Trash2, 
-  ArrowLeft, 
-  Search as SearchIcon, 
-  Loader2, 
-  Plus 
+import {
+  Folder,
+  Settings,
+  Trash2,
+  Plus,
+  Search as SearchIcon,
+  Loader2,
+  ArrowLeft,
+  Calendar
 } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
 import { motion, AnimatePresence } from "framer-motion";
 import { useParams, useRouter } from "next/navigation";
 import { DeleteWorkspaceDialog } from "@/components/workspaces/delete-workspace-dialog";
@@ -36,22 +36,23 @@ export default function WorkspaceDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const workspaceId = params.id as string;
-  
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
   const [resourceToDelete, setResourceToDelete] = useState<{ id: string, title: string } | null>(null);
-  
+
   const { currentUser } = useAuth();
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<{ chunk_index: number, content: string }[] | null>(null);
 
-  const { 
-    data: workspace, 
-    isLoading: isWorkspaceLoading, 
-    isError: isWorkspaceError, 
-    refetch: refetchWorkspace 
+  const {
+    data: workspace,
+    isLoading: isWorkspaceLoading,
+    isError: isWorkspaceError,
+    error: workspaceError,
+    refetch: refetchWorkspace
   } = useQuery({
     queryKey: ["workspace", workspaceId],
     queryFn: () => workspaceService.getWorkspace(workspaceId),
@@ -100,7 +101,7 @@ export default function WorkspaceDetailsPage() {
           <div className="h-6 w-24 bg-white/10 rounded mb-8"></div>
           <div className="h-12 w-1/3 bg-white/10 rounded mb-4"></div>
           <div className="h-4 w-1/2 bg-white/10 rounded mb-8"></div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">
               <div className="h-64 bg-white/5 rounded-[16px] border border-white/10"></div>
@@ -119,27 +120,19 @@ export default function WorkspaceDetailsPage() {
     return (
       <AppShell>
         <div className="mx-auto w-full max-w-7xl">
-          <button 
+          <button
             onClick={() => router.push("/workspaces")}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Workspaces
           </button>
-          
-          <div className="flex flex-col items-center justify-center py-20 rounded-[16px] bg-[#131316]/40 border border-white/5 text-center">
-            <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-            <h2 className="text-lg font-semibold text-foreground mb-2">Workspace Not Found</h2>
-            <p className="text-sm text-muted-foreground mb-6 max-w-sm">
-              The workspace you are looking for might have been deleted or you don&apos;t have access to it.
-            </p>
-            <button 
-              onClick={() => refetchWorkspace()}
-              className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-white/15"
-            >
-              Try Again
-            </button>
-          </div>
+
+          <ErrorState
+            error={workspaceError}
+            onRetry={refetchWorkspace}
+            title="Workspace Load Failed"
+          />
         </div>
       </AppShell>
     );
@@ -152,7 +145,7 @@ export default function WorkspaceDetailsPage() {
       <div className="mx-auto w-full max-w-7xl">
         <WorkspaceBreadcrumbs workspaceName={workspace.name} isLoading={isWorkspaceLoading} />
         <WorkspaceNavigation workspaceId={workspace.id} />
-        
+
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -172,13 +165,13 @@ export default function WorkspaceDetailsPage() {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-start sm:justify-end">
             <Link href={`/workspaces/${workspaceId}/settings`} className="flex items-center gap-2 rounded-[10px] bg-white/5 border border-white/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-white/10 transition-colors">
               <Settings className="h-4 w-4 text-muted-foreground" />
               Settings
             </Link>
-            <button 
+            <button
               onClick={() => setIsDeleteDialogOpen(true)}
               className="flex items-center gap-2 rounded-[10px] bg-red-500/10 border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"
             >
@@ -197,7 +190,7 @@ export default function WorkspaceDetailsPage() {
                   <Folder className="h-4 w-4 text-[#4A00FF]" />
                   Resources
                 </h3>
-                
+
                 <div className="flex items-center gap-3">
                   <form onSubmit={handleSearch} className="relative">
                     <input
@@ -210,7 +203,7 @@ export default function WorkspaceDetailsPage() {
                     <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                     <button type="submit" className="hidden" />
                   </form>
-                  <button 
+                  <button
                     onClick={() => setIsUploadDialogOpen(true)}
                     className="flex shrink-0 items-center gap-1.5 rounded-[10px] bg-[#4A00FF] px-3 py-2 text-xs font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors"
                   >
@@ -223,7 +216,7 @@ export default function WorkspaceDetailsPage() {
               {/* Search Results Area */}
               <AnimatePresence>
                 {searchQuery && searchMutation.isPending && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
@@ -233,7 +226,7 @@ export default function WorkspaceDetailsPage() {
                   </motion.div>
                 )}
                 {searchResults && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
@@ -241,7 +234,7 @@ export default function WorkspaceDetailsPage() {
                   >
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-semibold text-[#4A00FF]">Semantic Search Results</h4>
-                      <button 
+                      <button
                         onClick={() => { setSearchResults(null); setSearchQuery(""); }}
                         className="text-[10px] text-muted-foreground hover:text-foreground"
                       >
@@ -279,7 +272,7 @@ export default function WorkspaceDetailsPage() {
               ) : resources.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed border-white/10 rounded-[12px]">
                   <p className="text-sm text-muted-foreground mb-4">No resources added yet.</p>
-                  <button 
+                  <button
                     onClick={() => setIsUploadDialogOpen(true)}
                     className="text-xs font-medium text-[#4A00FF] hover:text-[#5A14FF]"
                   >
@@ -310,7 +303,7 @@ export default function WorkspaceDetailsPage() {
           <div className="space-y-6">
             <div className="rounded-[16px] bg-[#131316]/60 border border-white/10 p-6 backdrop-blur-[20px]">
               <h3 className="text-sm font-semibold text-foreground mb-4">Workspace Info</h3>
-              
+
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <Calendar className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
@@ -319,7 +312,7 @@ export default function WorkspaceDetailsPage() {
                     <p className="text-sm text-foreground">{formatDate(workspace.created_at)}</p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <Calendar className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                   <div>
@@ -350,7 +343,7 @@ export default function WorkspaceDetailsPage() {
                         ))}
                       </div>
                     ) : (
-                      <WorkspaceMembersList 
+                      <WorkspaceMembersList
                         workspaceId={workspaceId}
                         members={members}
                         currentUserId={currentUser?.id || ""}
@@ -365,8 +358,8 @@ export default function WorkspaceDetailsPage() {
         </div>
       </div>
 
-      <DeleteWorkspaceDialog 
-        isOpen={isDeleteDialogOpen} 
+      <DeleteWorkspaceDialog
+        isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         workspaceId={workspace.id}
         workspaceName={workspace.name}

@@ -9,7 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { workspaceService, WorkspaceCreate } from "@/services/workspace.service";
 import { toast } from "sonner";
 import { FolderPlus, Loader2, X, AlignLeft } from "lucide-react";
-import axios, { AxiosError } from "axios";
+import { getErrorMessage } from "@/lib/utils";
 
 import { useRouter } from "next/navigation";
 
@@ -55,20 +55,8 @@ export function CreateWorkspaceDialog({ isOpen, onClose }: CreateWorkspaceDialog
       onClose();
       router.push(`/workspaces/${data.id}`);
     },
-    onError: (error: Error | AxiosError) => {
-      let msg = "Failed to create workspace";
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const data = error.response.data as { detail?: unknown };
-        const detail = data.detail;
-        if (Array.isArray(detail)) {
-          msg = detail.map((err: { msg: string }) => err.msg).join(", ");
-        } else if (typeof detail === "string") {
-          msg = detail;
-        }
-      } else {
-        msg = error.message || msg;
-      }
-      toast.error(msg);
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Failed to create workspace"));
     }
   });
 

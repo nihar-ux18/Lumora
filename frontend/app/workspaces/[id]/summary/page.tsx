@@ -8,7 +8,7 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { BookOpen, Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
+import { getErrorMessage } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
 import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
@@ -29,13 +29,7 @@ export default function SummaryPage() {
       toast.success("Summary generated successfully");
     },
     onError: (error) => {
-      let msg = "Failed to generate summary";
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        msg = Array.isArray(error.response.data.detail) 
-          ? error.response.data.detail.map((e: { msg: string }) => e.msg).join(", ") 
-          : error.response.data.detail;
-      }
-      toast.error(msg);
+      toast.error(getErrorMessage(error, "Failed to generate summary"));
     },
     retry: false,
   });

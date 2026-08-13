@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { workspaceService } from "@/services/workspace.service";
 import { getDeterministicColor, formatDate } from "@/lib/utils";
 import Link from "next/link";
-import { AlertCircle } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
 import { CreateWorkspaceDialog } from "@/components/workspaces/create-workspace-dialog";
 
 export default function DashboardPage() {
@@ -23,6 +23,7 @@ export default function DashboardPage() {
     data: workspaces = [],
     isLoading,
     isError,
+    error,
     refetch,
   } = useQuery({
     queryKey: ["workspaces"],
@@ -51,24 +52,7 @@ export default function DashboardPage() {
         {isLoading ? (
           <DashboardSkeleton />
         ) : isError ? (
-          <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-white/5 bg-[#131316]/40 p-8 text-center">
-            <AlertCircle className="mb-3 h-8 w-8 text-red-400" />
-
-            <h2 className="text-base font-semibold text-foreground">
-              Failed to load workspaces
-            </h2>
-
-            <p className="mt-1 text-sm text-muted-foreground">
-              Something went wrong while loading your workspaces.
-            </p>
-
-            <button
-              onClick={() => refetch()}
-              className="mt-4 rounded-lg bg-[#4A00FF] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#5A14FF]"
-            >
-              Try Again
-            </button>
-          </div>
+          <ErrorState error={error} onRetry={refetch} />
         ) : isEmpty ? (
           <EmptyDashboard
             onCreateWorkspace={() => setIsCreateModalOpen(true)}

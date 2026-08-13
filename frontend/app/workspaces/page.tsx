@@ -8,7 +8,8 @@ import { CreateWorkspaceDialog } from "@/components/workspaces/create-workspace-
 import { useQuery } from "@tanstack/react-query";
 import { workspaceService } from "@/services/workspace.service";
 import { getDeterministicColor, formatDate } from "@/lib/utils";
-import { FolderPlus, AlertCircle, Search } from "lucide-react";
+import { FolderPlus, Search } from "lucide-react";
+import { ErrorState } from "@/components/ui/error-state";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -20,6 +21,7 @@ export default function WorkspacesPage() {
     data: workspaces = [], 
     isLoading, 
     isError, 
+    error,
     refetch 
   } = useQuery({
     queryKey: ["workspaces"],
@@ -72,16 +74,7 @@ export default function WorkspacesPage() {
         {isLoading ? (
           <WorkspacesSkeleton />
         ) : isError ? (
-          <div className="flex flex-col items-center justify-center py-20 rounded-[16px] bg-[#131316]/40 border border-white/5">
-            <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
-            <h2 className="text-lg font-semibold text-foreground mb-2">Failed to load workspaces</h2>
-            <button 
-              onClick={() => refetch()}
-              className="rounded-lg bg-[#4A00FF] px-4 py-2 text-sm font-medium text-white hover:bg-[#5A14FF]"
-            >
-              Try Again
-            </button>
-          </div>
+          <ErrorState error={error} onRetry={refetch} />
         ) : workspaces.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center rounded-[16px] bg-[#131316]/40 border border-white/5">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#4A00FF]/10 mb-4">

@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { resourceService } from "@/services/resource.service";
 import { toast } from "sonner";
 import { AlertTriangle, Loader2, X } from "lucide-react";
-import axios, { AxiosError } from "axios";
+import { getErrorMessage } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 interface DeleteResourceDialogProps {
@@ -31,20 +31,8 @@ export function DeleteResourceDialog({
       toast.success("Resource deleted successfully");
       onClose();
     },
-    onError: (error: Error | AxiosError) => {
-      let msg = "Failed to delete resource";
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const data = error.response.data as { detail?: unknown };
-        const detail = data.detail;
-        if (Array.isArray(detail)) {
-          msg = detail.map((err: { msg: string }) => err.msg).join(", ");
-        } else if (typeof detail === "string") {
-          msg = detail;
-        }
-      } else {
-        msg = error.message || msg;
-      }
-      toast.error(msg);
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Failed to delete resource"));
     }
   });
 

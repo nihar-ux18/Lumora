@@ -5,7 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { authService } from "@/services/auth.service";
 import { Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
+import { getErrorMessage } from "@/lib/utils";
 import Link from "next/link";
 
 export function ForgotPasswordForm() {
@@ -19,13 +19,7 @@ export function ForgotPasswordForm() {
       toast.success("Password reset link sent to your email.");
     },
     onError: (error) => {
-      let msg = "Failed to send reset link";
-      if (axios.isAxiosError(error) && error.response?.data?.detail) {
-        msg = Array.isArray(error.response.data.detail) 
-          ? error.response.data.detail.map((e: { msg: string }) => e.msg).join(", ") 
-          : error.response.data.detail;
-      }
-      toast.error(msg);
+      toast.error(getErrorMessage(error, "Failed to send reset link"));
     },
   });
 
