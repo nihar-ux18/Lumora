@@ -30,9 +30,11 @@ export default function DashboardPage() {
     queryFn: workspaceService.listWorkspaces,
   });
 
+  const workspacesList = Array.isArray(workspaces) ? workspaces : [];
+
   // Remove duplicate workspaces by ID before rendering.
   const uniqueWorkspaces = Array.from(
-    new Map(workspaces.map((workspace) => [workspace.id, workspace])).values()
+    new Map(workspacesList.map((workspace) => [workspace.id, workspace])).values()
   );
 
   const sortedWorkspaces = [...uniqueWorkspaces].sort(

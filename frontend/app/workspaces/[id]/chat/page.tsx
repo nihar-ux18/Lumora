@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { AppShell } from "@/components/app-shell";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { chatService, MessageRole, ChatResponse, MessageResponse, ChatSource } from "@/services/chat.service";
@@ -45,11 +45,14 @@ export default function AIChatPage() {
     enabled: !!activeChatId,
   });
 
+  const chatsList = useMemo(() => Array.isArray(chats) ? chats : [], [chats]);
+  const messagesList = useMemo(() => Array.isArray(messages) ? messages : [], [messages]);
+
   useEffect(() => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages]);
+  }, [messagesList]);
 
   const createChatMutation = useMutation({
     mutationFn: () => chatService.createChat(workspaceId, { title: "New Chat" }),
@@ -156,12 +159,12 @@ export default function AIChatPage() {
                     Retry
                   </button>
                 </div>
-              ) : chats.length === 0 ? (
+              ) : chatsList.length === 0 ? (
                 <div className="text-center py-10">
                   <p className="text-xs text-muted-foreground">No conversations yet.</p>
                 </div>
               ) : (
-                chats.map((chat) => (
+                chatsList.map((chat) => (
                   <div
                     key={chat.id}
                     onClick={() => setActiveChatId(chat.id)}
@@ -225,7 +228,7 @@ export default function AIChatPage() {
                     </button>
                     <div>
                       <h3 className="text-sm font-semibold text-foreground">
-                        {chats.find((c) => c.id === activeChatId)?.title || "Chat Session"}
+                        {chatsList.find((c) => c.id === activeChatId)?.title || "Chat Session"}
                       </h3>
                       <p className="text-[10px] text-muted-foreground">
                         AI Assistant
@@ -243,12 +246,12 @@ export default function AIChatPage() {
                     <div className="flex items-center justify-center h-full">
                       <ErrorState error={messagesError} onRetry={refetchMessages} />
                     </div>
-                  ) : messages.length === 0 ? (
+                  ) : messagesList.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                       No messages yet. Send a message to start!
                     </div>
                   ) : (
-                    messages.map((msg) => (
+                    messagesList.map((msg) => (
                       <motion.div
                         key={msg.id}
                         initial={{ opacity: 0, y: 10 }}

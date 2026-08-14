@@ -28,7 +28,9 @@ export default function WorkspacesPage() {
     queryFn: workspaceService.listWorkspaces,
   });
 
-  const sortedWorkspaces = [...workspaces].sort(
+  const workspacesList = Array.isArray(workspaces) ? workspaces : [];
+
+  const sortedWorkspaces = [...workspacesList].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 

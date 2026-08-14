@@ -79,6 +79,9 @@ export default function WorkspaceDetailsPage() {
     enabled: !!workspaceId && isOwner,
   });
 
+  const resourcesList = Array.isArray(resources) ? resources : [];
+  const membersList = Array.isArray(members) ? members : [];
+
   const searchMutation = useMutation({
     mutationFn: () => resourceService.searchResources(workspaceId, { query: searchQuery, limit: 5 }),
     onSuccess: (data) => setSearchResults(data),
@@ -269,7 +272,7 @@ export default function WorkspaceDetailsPage() {
                     <div key={i} className="h-32 rounded-[16px] bg-white/5 border border-white/10 animate-pulse" />
                   ))}
                 </div>
-              ) : resources.length === 0 ? (
+              ) : resourcesList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed border-white/10 rounded-[12px]">
                   <p className="text-sm text-muted-foreground mb-4">No resources added yet.</p>
                   <button
@@ -281,7 +284,7 @@ export default function WorkspaceDetailsPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {resources.map((resource, index) => (
+                  {resourcesList.map((resource, index) => (
                     <ResourceCard
                       key={resource.id}
                       id={resource.id}
@@ -325,7 +328,7 @@ export default function WorkspaceDetailsPage() {
                   <div className="mt-8 pt-6 border-t border-white/10">
                     <div className="flex items-center justify-between mb-4">
                       <h4 className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                        Members ({members.length})
+                        Members ({membersList.length})
                       </h4>
                       <button
                         onClick={() => setIsInviteDialogOpen(true)}
@@ -345,7 +348,7 @@ export default function WorkspaceDetailsPage() {
                     ) : (
                       <WorkspaceMembersList
                         workspaceId={workspaceId}
-                        members={members}
+                        members={membersList}
                         currentUserId={currentUser?.id || ""}
                         isOwner={isOwner}
                       />
