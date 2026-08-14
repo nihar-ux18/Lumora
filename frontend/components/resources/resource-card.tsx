@@ -88,7 +88,8 @@ export function ResourceCard({
                 e.preventDefault();
                 onDelete();
               }}
-              className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-colors"
+              aria-label="Delete resource"
+              className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
             >
               <Trash2 className="h-4 w-4" />
             </button>
