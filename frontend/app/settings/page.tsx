@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { AppShell } from "@/components/app-shell";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -14,6 +14,9 @@ import { ErrorState } from "@/components/ui/error-state";
 export default function SettingsPage() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fullnameId = useId();
+  const emailId = useId();
 
   const {
     data: user,
@@ -118,7 +121,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadAvatarMutation.isPending}
-                      className="flex items-center gap-2 px-4 py-2 rounded-[8px] bg-white/5 text-sm font-medium text-foreground hover:bg-white/10 transition-colors disabled:opacity-50"
+                      className="flex items-center gap-2 px-4 py-2 rounded-[8px] bg-white/5 text-sm font-medium text-foreground hover:bg-white/10 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
                     >
                       <Upload className="h-4 w-4" />
                       Change Avatar
@@ -127,8 +130,9 @@ export default function SettingsPage() {
 
                   <form onSubmit={handleSaveProfile} className="flex-1 space-y-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Full Name</label>
+                      <label htmlFor={fullnameId} className="text-sm font-medium text-foreground">Full Name</label>
                       <input
+                        id={fullnameId}
                         type="text"
                         value={fullname}
                         onChange={(e) => setFullname(e.target.value)}
@@ -141,12 +145,13 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">Email</label>
+                      <label htmlFor={emailId} className="text-sm font-medium text-foreground">Email</label>
                       <input
+                        id={emailId}
                         type="email"
                         value={user?.email || ""}
                         disabled
-                        className="w-full h-11 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-muted-foreground opacity-50 cursor-not-allowed"
+                        className="w-full h-11 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-muted-foreground opacity-50 cursor-not-allowed focus:outline-none"
                       />
                       <p className="text-xs text-muted-foreground">Email cannot be changed directly.</p>
                     </div>
@@ -155,7 +160,7 @@ export default function SettingsPage() {
                       <button
                         type="submit"
                         disabled={updateProfileMutation.isPending || fullname === user?.fullname || !fullname.trim()}
-                        className="flex items-center gap-2 px-6 py-2.5 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
                       >
                         {updateProfileMutation.isPending ? (
                           <Loader2 className="h-4 w-4 animate-spin" />

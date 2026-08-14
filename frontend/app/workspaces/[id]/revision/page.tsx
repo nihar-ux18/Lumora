@@ -75,13 +75,14 @@ export default function RevisionPage() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="What topic would you like to review?"
+                aria-label="What topic would you like to review?"
                 disabled={generateMutation.isPending}
-                className="flex-1 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50"
+                className="flex-1 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
               />
               <button
                 type="submit"
                 disabled={!topic.trim() || generateMutation.isPending}
-                className="flex items-center justify-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50 w-full sm:w-auto shrink-0"
+                className="flex items-center justify-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50 w-full sm:w-auto shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
               >
                 {generateMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -95,7 +96,7 @@ export default function RevisionPage() {
 
           <div className="flex-1 rounded-[20px] bg-[#131316]/60 border border-white/10 p-8 backdrop-blur-[20px] min-h-[400px] flex flex-col items-center justify-center">
             {generateMutation.isPending ? (
-              <div className="w-full max-w-2xl h-64 rounded-[20px] bg-white/5 border border-white/10 p-8 flex flex-col items-center justify-center relative overflow-hidden">
+              <div className="w-full max-w-2xl h-64 rounded-[20px] bg-white/5 border border-white/10 p-8 flex flex-col items-center justify-center relative overflow-hidden" role="status" aria-live="polite">
                 <motion.div 
                   className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
                   animate={{ x: ["-100%", "100%"] }}

@@ -64,8 +64,9 @@ export default function FlashcardsPage() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder="What topic would you like to review?"
+                aria-label="What topic would you like to review?"
                 disabled={generateMutation.isPending}
-                className="flex-1 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 w-full"
+                className="flex-1 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
               />
               <div className="flex items-center gap-4 w-full sm:w-auto">
                 <input
@@ -74,13 +75,14 @@ export default function FlashcardsPage() {
                   max="50"
                   value={numCards}
                   onChange={(e) => setNumCards(Number(e.target.value))}
+                  aria-label="Number of flashcards to generate"
                   disabled={generateMutation.isPending}
-                  className="w-24 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 text-center shrink-0"
+                  className="w-24 h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 text-center shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
                 />
                 <button
                   type="submit"
                   disabled={!topic.trim() || generateMutation.isPending}
-                  className="flex flex-1 items-center justify-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50 whitespace-nowrap"
+                  className="flex flex-1 items-center justify-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
                 >
                 {generateMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -95,7 +97,8 @@ export default function FlashcardsPage() {
 
           <div className="flex-1 rounded-[20px] bg-[#131316]/60 border border-white/10 p-8 backdrop-blur-[20px] min-h-[400px]">
             {generateMutation.isPending ? (
-              <div className="space-y-4 animate-pulse">
+              <div className="space-y-4 animate-pulse" role="status" aria-live="polite">
+                <span className="sr-only">Analyzing workspace resources and generating flashcards...</span>
                 <div className="h-32 w-full bg-white/5 rounded-xl mb-4"></div>
                 <div className="h-32 w-full bg-white/5 rounded-xl mb-4"></div>
                 <div className="h-32 w-full bg-white/5 rounded-xl mb-4"></div>

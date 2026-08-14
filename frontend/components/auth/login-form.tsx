@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useId } from "react";
 import { Mail, Loader2, AlertCircle } from "lucide-react";
 import { useLoginForm } from "@/hooks/use-login-form";
 import { PasswordInput } from "./password-input";
@@ -13,6 +14,7 @@ export function LoginForm() {
     register,
     formState: { errors },
   } = form;
+  const rememberMeId = useId();
 
   return (
     <div className="w-full">
@@ -73,11 +75,12 @@ export function LoginForm() {
 
         {/* Remember Me & Forgot Password */}
         <div className="flex items-center justify-between mt-2">
-          <label className="flex items-center gap-2 cursor-pointer group">
-            <div className="relative flex items-center justify-center h-4 w-4 rounded-[4px] border border-white/20 bg-black/20 group-hover:border-[#4A00FF]/50 transition-colors">
+          <label htmlFor={rememberMeId} className="flex items-center gap-2 cursor-pointer group">
+            <div className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-[6px] border border-white/10 bg-white/5 overflow-hidden transition-colors group-hover:border-white/20 focus-within:ring-2 focus-within:ring-[#4A00FF]/60">
               <input
+                id={rememberMeId}
                 type="checkbox"
-                className="peer absolute inset-0 opacity-0 cursor-pointer"
+                className="peer absolute inset-0 opacity-0 cursor-pointer focus:outline-none"
                 {...register("rememberMe")}
               />
               <svg
@@ -97,8 +100,8 @@ export function LoginForm() {
           </label>
 
           <Link
-            href="#"
-            className="text-[11px] font-medium text-[#4A00FF] hover:text-[#5A14FF] transition-colors"
+            href="/auth/forgot-password"
+            className="text-[11px] font-medium text-[#4A00FF] hover:text-[#5A14FF] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50 rounded-sm"
           >
             Forgot password?
           </Link>

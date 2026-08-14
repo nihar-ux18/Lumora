@@ -309,13 +309,15 @@ export default function AIChatPage() {
                       value={inputMessage}
                       onChange={(e) => setInputMessage(e.target.value)}
                       placeholder="Ask anything about your resources..."
+                      aria-label="Ask anything about your resources..."
                       disabled={sendMessageMutation.isPending}
-                      className="w-full h-12 pl-4 pr-12 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50"
+                      className="w-full h-12 pl-4 pr-12 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
                     />
                     <button
                       type="submit"
                       disabled={!inputMessage.trim() || sendMessageMutation.isPending}
-                      className="absolute right-2 flex items-center justify-center h-8 w-8 rounded-[8px] bg-[#4A00FF] text-white hover:bg-[#5A14FF] transition-colors disabled:opacity-50 disabled:hover:bg-[#4A00FF]"
+                      aria-label="Send message"
+                      className="absolute right-2 flex items-center justify-center h-8 w-8 rounded-[8px] bg-[#4A00FF] text-white hover:bg-[#5A14FF] transition-colors disabled:opacity-50 disabled:hover:bg-[#4A00FF] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                     >
                       {sendMessageMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 ml-0.5" />}
                     </button>

@@ -31,9 +31,9 @@ export function WorkspacePreviewCard({
         <div className={`flex h-10 w-10 items-center justify-center rounded-[12px] ${color} shadow-lg shadow-black/20`}>
           <Folder className="h-5 w-5 text-white" />
         </div>
-        <button className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors">
+        <div className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
           <MoreVertical className="h-4 w-4" />
-        </button>
+        </div>
       </div>
       
       <h3 className="text-sm font-semibold text-foreground line-clamp-1 mb-1">

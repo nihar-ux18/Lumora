@@ -28,7 +28,7 @@ export function WorkspaceBreadcrumbs({ workspaceId, workspaceName, isLoading }: 
     <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
       <Link 
         href="/workspaces"
-        className="flex items-center gap-1.5 hover:text-foreground transition-colors"
+        className="flex items-center gap-1.5 hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/60 rounded-md"
       >
         <Folder className="h-4 w-4" />
         <span className="hidden sm:inline">Workspaces</span>

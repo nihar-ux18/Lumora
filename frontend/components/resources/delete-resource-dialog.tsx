@@ -5,7 +5,7 @@ import { resourceService } from "@/services/resource.service";
 import { toast } from "sonner";
 import { AlertTriangle, Loader2, X } from "lucide-react";
 import { getErrorMessage } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 interface DeleteResourceDialogProps {
   isOpen: boolean;
@@ -39,16 +39,10 @@ export function DeleteResourceDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
-        onClick={() => !deleteMutation.isPending && onClose()}
-      />
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="relative w-full max-w-md rounded-[20px] bg-[#131316] border border-white/10 shadow-2xl overflow-hidden"
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        showCloseButton={false}
+        className="sm:max-w-md p-0 overflow-hidden rounded-[20px] bg-[#131316] border border-white/10 shadow-2xl outline-none"
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
@@ -56,12 +50,13 @@ export function DeleteResourceDialog({
               <div className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-red-500/20 text-red-500">
                 <AlertTriangle className="h-5 w-5" />
               </div>
-              <h2 className="text-xl font-bold text-foreground">Delete Resource</h2>
+              <DialogTitle className="text-xl font-bold text-foreground">Delete Resource</DialogTitle>
             </div>
             <button 
               onClick={onClose}
               disabled={deleteMutation.isPending}
-              className="rounded-full p-2 hover:bg-white/5 transition-colors disabled:opacity-50"
+              className="rounded-full p-2 hover:bg-white/5 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+              aria-label="Close dialog"
             >
               <X className="h-5 w-5 text-muted-foreground" />
             </button>
@@ -78,14 +73,14 @@ export function DeleteResourceDialog({
             <button
               onClick={onClose}
               disabled={deleteMutation.isPending}
-              className="px-4 py-2 rounded-[10px] bg-white/5 text-sm font-medium text-foreground hover:bg-white/10 transition-colors disabled:opacity-50"
+              className="px-4 py-2 rounded-[10px] bg-white/5 text-sm font-medium text-foreground hover:bg-white/10 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
             >
               Cancel
             </button>
             <button
               onClick={() => deleteMutation.mutate()}
               disabled={deleteMutation.isPending}
-              className="flex items-center gap-2 px-5 py-2 rounded-[10px] bg-red-500 text-sm font-medium text-white shadow-lg shadow-red-500/25 hover:bg-red-600 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 rounded-[10px] bg-red-500 text-sm font-medium text-white shadow-lg shadow-red-500/25 hover:bg-red-600 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
             >
               {deleteMutation.isPending ? (
                 <>
@@ -98,7 +93,7 @@ export function DeleteResourceDialog({
             </button>
           </div>
         </div>
-      </motion.div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

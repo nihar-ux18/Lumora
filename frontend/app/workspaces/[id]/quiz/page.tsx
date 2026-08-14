@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import { AppShell } from "@/components/app-shell";
 import { useMutation } from "@tanstack/react-query";
 import { quizService, QuizQuestion, QuizSubmissionResponse } from "@/services/quiz.service";
@@ -15,6 +15,9 @@ import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigatio
 export default function QuizPage() {
   const params = useParams();
   const workspaceId = params.id as string;
+  const topicId = useId();
+  const numQuestionsId = useId();
+
   const [topic, setTopic] = useState("");
   const [numQuestions, setNumQuestions] = useState(5);
   
@@ -109,32 +112,34 @@ export default function QuizPage() {
 
               <form onSubmit={handleGenerate} className="flex flex-col sm:flex-row items-end gap-4 mt-6">
                 <div className="flex-1 w-full space-y-1.5">
-                  <label className="text-xs text-muted-foreground font-medium pl-1">Topic</label>
+                  <label htmlFor={topicId} className="text-xs text-muted-foreground font-medium pl-1">Topic</label>
                   <input
+                    id={topicId}
                     type="text"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     placeholder="E.g., Quantum Computing Basics"
                     disabled={generateMutation.isPending}
-                    className="w-full h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50"
+                    className="w-full h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
                   />
                 </div>
                 <div className="w-full sm:w-24 space-y-1.5">
-                  <label className="text-xs text-muted-foreground font-medium pl-1">Questions</label>
+                  <label htmlFor={numQuestionsId} className="text-xs text-muted-foreground font-medium pl-1">Questions</label>
                   <input
+                    id={numQuestionsId}
                     type="number"
                     min="1"
                     max="20"
                     value={numQuestions}
                     onChange={(e) => setNumQuestions(Number(e.target.value))}
                     disabled={generateMutation.isPending}
-                    className="w-full h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 text-center"
+                    className="w-full h-12 px-4 rounded-[12px] bg-white/5 border border-white/10 text-sm text-foreground focus:outline-none focus:border-[#4A00FF]/50 transition-colors disabled:opacity-50 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={!topic.trim() || generateMutation.isPending}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 h-12 px-6 rounded-[12px] bg-[#4A00FF] text-sm font-medium text-white shadow-lg shadow-[#4A00FF]/25 hover:bg-[#5A14FF] transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
                 >
                   {generateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                   {generateMutation.isPending ? "Generating..." : "Generate"}
@@ -154,7 +159,7 @@ export default function QuizPage() {
                 <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                   Question {currentQuestionIdx + 1} of {questions.length}
                 </h2>
-                <button onClick={resetQuiz} className="text-xs text-muted-foreground hover:text-white transition-colors">
+                <button onClick={resetQuiz} className="text-xs text-muted-foreground hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 rounded-md p-1">
                   Cancel Quiz
                 </button>
               </div>
@@ -179,7 +184,7 @@ export default function QuizPage() {
                           key={idx}
                           onClick={() => handleOptionSelect(idx)}
                           disabled={quizState === "submitting"}
-                          className={`w-full flex items-center p-4 rounded-[16px] border text-left transition-all ${
+                          className={`w-full flex items-center p-4 rounded-[16px] border text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50 ${
                             isSelected 
                               ? "bg-[#4A00FF]/10 border-[#4A00FF] shadow-[0_0_15px_rgba(74,0,255,0.1)]" 
                               : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"

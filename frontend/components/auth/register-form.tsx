@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { useId } from "react";
 import { Mail, User, Loader2, AlertCircle } from "lucide-react";
 import { useRegisterForm, calculatePasswordStrength } from "@/hooks/use-register-form";
 import { PasswordInput } from "./password-input";
@@ -14,6 +15,7 @@ export function RegisterForm() {
     watch,
     formState: { errors },
   } = form;
+  const termsId = useId();
 
   const passwordValue = watch("password");
   const strength = calculatePasswordStrength(passwordValue);
@@ -142,11 +144,12 @@ export function RegisterForm() {
 
         {/* Terms and Conditions */}
         <div className="mt-2 space-y-1.5">
-          <label className="flex items-start gap-2.5 cursor-pointer group pt-1">
-            <div className="relative flex items-center justify-center h-4 w-4 mt-0.5 rounded-[4px] border border-white/20 bg-black/20 group-hover:border-[#4A00FF]/50 transition-colors shrink-0">
+          <label htmlFor={termsId} className="flex items-start gap-2.5 cursor-pointer group pt-1">
+            <div className="relative flex items-center justify-center h-4 w-4 mt-0.5 rounded-[4px] border border-white/20 bg-black/20 group-hover:border-[#4A00FF]/50 transition-colors shrink-0 focus-within:ring-2 focus-within:ring-[#4A00FF]/60">
               <input
+                id={termsId}
                 type="checkbox"
-                className="peer absolute inset-0 opacity-0 cursor-pointer"
+                className="peer absolute inset-0 opacity-0 cursor-pointer focus:outline-none"
                 {...register("terms")}
               />
               <svg
@@ -162,11 +165,11 @@ export function RegisterForm() {
             </div>
             <span className="text-[11px] leading-snug text-muted-foreground group-hover:text-foreground transition-colors">
               I agree to the{" "}
-              <Link href="#" className="text-[#4A00FF] hover:underline">
+              <Link href="#" className="text-[#4A00FF] hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#4A00FF]/50 rounded-sm">
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link href="#" className="text-[#4A00FF] hover:underline">
+              <Link href="#" className="text-[#4A00FF] hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#4A00FF]/50 rounded-sm">
                 Privacy Policy
               </Link>
             </span>

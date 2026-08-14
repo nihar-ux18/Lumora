@@ -41,7 +41,7 @@ export function WorkspaceNavigation({ workspaceId }: WorkspaceNavigationProps) {
           <Link
             key={item.name}
             href={item.path}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/60 ${
               isActive 
                 ? "bg-[#4A00FF]/10 text-[#4A00FF] border border-[#4A00FF]/20" 
                 : "text-muted-foreground hover:text-foreground hover:bg-white/5 border border-transparent"

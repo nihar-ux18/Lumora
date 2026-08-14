@@ -69,7 +69,7 @@ export function Sidebar() {
             const Icon = item.icon;
 
             return (
-              <Link key={item.name} href={item.href} className="relative block">
+              <Link key={item.name} href={item.href} className="relative block rounded-[12px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/60">
                 <motion.div
                   whileHover={{ scale: 1.02, x: 2 }}
                   whileTap={{ scale: 0.98 }}
@@ -111,7 +111,7 @@ export function Sidebar() {
 
       {/* Bottom Profile Section */}
       <div className="p-4 border-t border-white/10">
-        <Link href="/settings">
+        <Link href="/settings" className="block rounded-[12px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/60">
           <motion.div
             whileHover={{ scale: 1.01 }}
             className="flex items-center justify-between rounded-[12px] bg-white/5 p-2.5 border border-white/5 hover:border-white/10 transition-colors cursor-pointer"

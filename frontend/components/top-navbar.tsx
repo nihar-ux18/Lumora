@@ -23,7 +23,8 @@ export function TopNavbar({ onOpenCommandMenu, onOpenMobileMenu }: TopNavbarProp
       <div className="flex items-center gap-3 md:gap-4">
         <button
           onClick={onOpenMobileMenu}
-          className="md:hidden p-2 rounded-lg text-muted-foreground hover:bg-white/5 transition-colors focus:outline-none"
+          aria-label="Open mobile navigation menu"
+          className="md:hidden p-2 rounded-lg text-muted-foreground hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50"
         >
           <Menu className="h-5 w-5" />
         </button>

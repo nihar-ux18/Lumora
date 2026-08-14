@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useState } from "react";
+import { forwardRef, useState, useId } from "react";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -14,11 +14,13 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
   ({ label, error, className = "", ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
+    const generatedId = useId();
+    const inputId = props.id || generatedId;
 
     return (
       <div className="w-full space-y-1.5">
         {label && (
-          <label className="block text-xs font-medium text-foreground">
+          <label htmlFor={inputId} className="block text-xs font-medium text-foreground">
             {label}
           </label>
         )}
@@ -36,6 +38,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <Lock className="h-4 w-4 text-muted-foreground shrink-0 mr-2.5" />
           <input
             ref={ref}
+            id={inputId}
             type={showPassword ? "text" : "password"}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
@@ -45,8 +48,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="text-muted-foreground hover:text-foreground transition-colors shrink-0 ml-2 focus:outline-none"
-            tabIndex={-1}
+            className="text-muted-foreground hover:text-foreground transition-colors shrink-0 ml-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4A00FF]/50 rounded-sm"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
