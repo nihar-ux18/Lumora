@@ -72,7 +72,14 @@ export const resourceService = {
     onUploadProgress?: (progressEvent: AxiosProgressEvent) => void
   ): Promise<ResourceResponse> => {
     const formData = new FormData();
-    formData.append("file", file);
+
+    // Sanitize filename to prevent path traversal or UI injection
+    const sanitizedName = file.name
+      .replace(/[^a-zA-Z0-9.\-_ ]/g, "_")
+      .replace(/\.\.+/g, ".");
+    const sanitizedFile = new File([file], sanitizedName, { type: file.type });
+
+    formData.append("file", sanitizedFile);
     
     const response = await apiClient.post(RESOURCES.UPLOAD(resourceId), formData, {
       onUploadProgress,

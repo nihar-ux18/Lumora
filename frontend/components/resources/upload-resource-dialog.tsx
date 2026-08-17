@@ -27,12 +27,56 @@ const uploadSchema = z.object({
       path: ["source_url"],
     });
   }
-  if (["pdf", "docx", "image"].includes(data.resource_type) && (!data.file || data.file.length === 0)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "File is required for this resource type",
-      path: ["file"],
-    });
+  if (["pdf", "docx", "image"].includes(data.resource_type)) {
+    if (!data.file || data.file.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "File is required for this resource type",
+        path: ["file"],
+      });
+    } else {
+      const file = data.file[0];
+
+      // 1. File Size Validation (Max 10 MB)
+      if (file.size > 10 * 1024 * 1024) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "File size must not exceed 10 MB",
+          path: ["file"],
+        });
+      }
+
+      // 2. File Type / Extension Validation
+      const fileNameLower = file.name.toLowerCase();
+      if (data.resource_type === "pdf") {
+        const isPdf = file.type === "application/pdf" || fileNameLower.endsWith(".pdf");
+        if (!isPdf) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Only PDF files are allowed for PDF resource type",
+            path: ["file"],
+          });
+        }
+      } else if (data.resource_type === "docx") {
+        const isDocx = file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" || fileNameLower.endsWith(".docx");
+        if (!isDocx) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Only DOCX files are allowed for DOCX resource type",
+            path: ["file"],
+          });
+        }
+      } else if (data.resource_type === "image") {
+        const isImage = file.type.startsWith("image/") || [".png", ".jpg", ".jpeg", ".webp", ".gif"].some(ext => fileNameLower.endsWith(ext));
+        if (!isImage) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Only image files are allowed for Image resource type",
+            path: ["file"],
+          });
+        }
+      }
+    }
   }
 });
 

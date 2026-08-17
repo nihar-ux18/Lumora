@@ -11,17 +11,21 @@ export const registerSchema = z
     fullName: z
       .string()
       .min(1, "Full name is required")
-      .min(2, "Full name must be at least 2 characters"),
+      .min(2, "Full name must be at least 2 characters")
+      .max(100, "Full name must not exceed 100 characters"),
     email: z
       .string()
       .min(1, "Email address is required")
+      .max(255, "Email address must not exceed 255 characters")
       .email("Please enter a valid email address"),
     password: z
       .string()
-      .min(8, "Password must be at least 8 characters"),
+      .min(8, "Password must be at least 8 characters")
+      .max(100, "Password must not exceed 100 characters"),
     confirmPassword: z
       .string()
-      .min(1, "Please confirm your password"),
+      .min(1, "Please confirm your password")
+      .max(100, "Password confirmation must not exceed 100 characters"),
     terms: z.boolean().refine((val) => val === true, {
       message: "You must agree to the Terms and Conditions",
     }),

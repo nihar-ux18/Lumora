@@ -12,12 +12,14 @@ import { getErrorMessage } from "@/lib/utils";
 import { ErrorState } from "@/components/ui/error-state";
 import { WorkspaceBreadcrumbs } from "@/components/workspaces/workspace-breadcrumbs";
 import { WorkspaceNavigation } from "@/components/workspaces/workspace-navigation";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function WorkspaceSettingsPage() {
   const params = useParams();
   const router = useRouter();
   const workspaceId = params.id as string;
   const queryClient = useQueryClient();
+  const { currentUser } = useAuth();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -31,6 +33,7 @@ export default function WorkspaceSettingsPage() {
     queryKey: ["workspace", workspaceId],
     queryFn: () => workspaceService.getWorkspace(workspaceId),
     retry: 1,
+    enabled: !!workspaceId,
   });
 
   useEffect(() => {
@@ -41,6 +44,14 @@ export default function WorkspaceSettingsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace]);
+
+  // Authorization check: redirect non-owners back
+  useEffect(() => {
+    if (workspace && currentUser && workspace.owner_id !== currentUser.id) {
+      toast.error("You do not have permission to access workspace settings");
+      router.replace(`/workspaces/${workspaceId}`);
+    }
+  }, [workspace, currentUser, workspaceId, router]);
 
   const updateMutation = useMutation({
     mutationFn: (data: WorkspaceUpdate) => workspaceService.updateWorkspace(workspaceId, data),
@@ -58,6 +69,14 @@ export default function WorkspaceSettingsPage() {
     e.preventDefault();
     if (!name.trim()) {
       toast.error("Workspace name is required");
+      return;
+    }
+    if (name.length > 255) {
+      toast.error("Workspace name must not exceed 255 characters");
+      return;
+    }
+    if (description && description.length > 1000) {
+      toast.error("Workspace description must not exceed 1000 characters");
       return;
     }
     updateMutation.mutate({ name, description });
@@ -98,6 +117,10 @@ export default function WorkspaceSettingsPage() {
         </div>
       </AppShell>
     );
+  }
+
+  if (workspace && currentUser && workspace.owner_id !== currentUser.id) {
+    return null;
   }
 
   return (

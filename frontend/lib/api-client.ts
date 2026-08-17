@@ -2,7 +2,7 @@ import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from "ax
 
 export const ACCESS_TOKEN_KEY = "lumora_access_token";
 
-const isMockAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_MOCK_AUTH === "true";
+const isMockAuthEnabled = process.env.NEXT_PUBLIC_ENABLE_MOCK_AUTH === "true" && process.env.NODE_ENV !== "production";
 const MOCK_TOKEN = "development-mock-token";
 
 export const apiClient: AxiosInstance = axios.create({
@@ -44,7 +44,10 @@ apiClient.interceptors.response.use(
             // Keep mock session alive even if backend returns 401
           } else {
             localStorage.removeItem(ACCESS_TOKEN_KEY);
-            // Potential redirect logic here
+            if (!window.location.pathname.startsWith("/auth")) {
+              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+              window.location.href = `/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+            }
           }
         }
       } else if (status === 403) {

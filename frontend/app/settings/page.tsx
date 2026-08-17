@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect, useId } from "react";
 import { AppShell } from "@/components/app-shell";
 import { ProtectedRoute } from "@/components/auth/protected-route";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { usersService } from "@/services/users.service";
+import { useAuth } from "@/providers/auth-provider";
 import { Loader2, Upload, User as UserIcon, Save } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -18,16 +19,7 @@ export default function SettingsPage() {
   const fullnameId = useId();
   const emailId = useId();
 
-  const {
-    data: user,
-    isLoading,
-    isError,
-    error,
-    refetch
-  } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: usersService.getMe,
-  });
+  const { currentUser: user, isLoading } = useAuth();
 
   const [fullname, setFullname] = useState("");
 
@@ -79,12 +71,10 @@ export default function SettingsPage() {
         <div className="mx-auto w-full max-w-3xl">
           <h1 className="text-2xl font-bold text-foreground mb-8">Account Settings</h1>
 
-          {isLoading ? (
+          {isLoading || !user ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="h-8 w-8 text-[#4A00FF] animate-spin" />
             </div>
-          ) : isError ? (
-            <ErrorState error={error} onRetry={refetch} />
           ) : (
             <div className="space-y-8">
               {/* Profile Section */}

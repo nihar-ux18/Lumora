@@ -101,7 +101,25 @@ export default function SummaryPage() {
                 animate={{ opacity: 1, y: 0 }}
                 className="prose prose-invert prose-p:text-muted-foreground prose-headings:text-foreground prose-a:text-[#4A00FF] max-w-none"
               >
-                <ReactMarkdown>{cachedSummary.summary}</ReactMarkdown>
+                <ReactMarkdown
+                  components={{
+                    a: ({ href, children }) => {
+                      const isExternal = href?.startsWith("http://") || href?.startsWith("https://");
+                      return (
+                        <a
+                          href={href}
+                          target={isExternal ? "_blank" : undefined}
+                          rel={isExternal ? "noopener noreferrer" : undefined}
+                          className="underline text-[#4A00FF] hover:text-[#5A14FF] transition-colors"
+                        >
+                          {children}
+                        </a>
+                      );
+                    }
+                  }}
+                >
+                  {cachedSummary.summary}
+                </ReactMarkdown>
               </motion.div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center py-20">

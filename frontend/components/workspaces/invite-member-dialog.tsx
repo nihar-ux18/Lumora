@@ -18,7 +18,7 @@ interface InviteMemberDialogProps {
 }
 
 const inviteSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  email: z.string().max(255, "Email address must not exceed 255 characters").email("Please enter a valid email address"),
 });
 
 type FormValues = z.infer<typeof inviteSchema>;

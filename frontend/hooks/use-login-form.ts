@@ -11,10 +11,12 @@ export const loginSchema = z.object({
   email: z
     .string()
     .min(1, "Email address is required")
+    .max(255, "Email address must not exceed 255 characters")
     .email("Please enter a valid email address"),
   password: z
     .string()
-    .min(8, "Password must be at least 8 characters"),
+    .min(8, "Password must be at least 8 characters")
+    .max(100, "Password must not exceed 100 characters"),
   rememberMe: z.boolean(),
 });
 

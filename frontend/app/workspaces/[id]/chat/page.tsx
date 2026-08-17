@@ -31,6 +31,7 @@ export default function AIChatPage() {
   } = useQuery({
     queryKey: ["chat-list", workspaceId],
     queryFn: () => chatService.listChats(workspaceId),
+    enabled: !!workspaceId,
   });
 
   const {

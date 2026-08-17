@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { FileText, Image as ImageIcon, Link as LinkIcon, AlignLeft, Trash2, ExternalLink } from "lucide-react";
 import { ResourceType } from "@/services/resource.service";
 import { formatDate } from "@/lib/utils";
+import { sanitizeUrl } from "@/lib/url";
 
 interface ResourceCardProps {
   id: string;
@@ -74,7 +75,7 @@ export function ResourceCard({
         <div className="flex items-center gap-2">
           {source_url && (
             <a 
-              href={source_url} 
+              href={sanitizeUrl(source_url)}
               target="_blank" 
               rel="noopener noreferrer"
               className="h-8 w-8 rounded-full flex items-center justify-center text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors"

@@ -169,19 +169,21 @@ export default function WorkspaceDetailsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-start sm:justify-end">
-            <Link href={`/workspaces/${workspaceId}/settings`} className="flex items-center gap-2 rounded-[10px] bg-white/5 border border-white/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-white/10 transition-colors">
-              <Settings className="h-4 w-4 text-muted-foreground" />
-              Settings
-            </Link>
-            <button
-              onClick={() => setIsDeleteDialogOpen(true)}
-              className="flex items-center gap-2 rounded-[10px] bg-red-500/10 border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </button>
-          </div>
+          {isOwner && (
+            <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-start sm:justify-end">
+              <Link href={`/workspaces/${workspaceId}/settings`} className="flex items-center gap-2 rounded-[10px] bg-white/5 border border-white/10 px-4 py-2 text-sm font-medium text-foreground hover:bg-white/10 transition-colors">
+                <Settings className="h-4 w-4 text-muted-foreground" />
+                Settings
+              </Link>
+              <button
+                onClick={() => setIsDeleteDialogOpen(true)}
+                className="flex items-center gap-2 rounded-[10px] bg-red-500/10 border border-red-500/20 px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20 transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
+              </button>
+            </div>
+          )}
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
