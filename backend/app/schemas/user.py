@@ -15,6 +15,7 @@ class UserResponse(BaseModel):
     is_verified: bool
     is_active: bool
     created_at: datetime
+    email_error: str | None = None
     
 class UpdateProfileRequest(BaseModel):
     fullname: str | None = Field(default=None, min_length=2, max_length=255)

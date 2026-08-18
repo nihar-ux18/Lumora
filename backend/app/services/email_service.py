@@ -17,7 +17,7 @@ async def send_email(*,to_email: str,to_name: str,subject: str,html_content: str
 
 async def send_verification_email(*,to_email: str,to_name: str,token: str,) -> None:
     verification_url = (
-        f"http://127.0.0.1:8000/auth/verify-email?token={token}"
+        f"{settings.frontend_url}/auth/verify-email?token={token}"
     )
 
     html = f"""
@@ -39,7 +39,7 @@ async def send_verification_email(*,to_email: str,to_name: str,token: str,) -> N
 
 async def send_password_reset_email(*,to_email: str,to_name: str,token: str,) -> None:
     reset_url = (
-        f"http://127.0.0.1:8000/auth/reset-password?token={token}"
+        f"{settings.frontend_url}/auth/reset-password?token={token}"
     )
 
     html = f"""

@@ -6,12 +6,11 @@ from app.core.exceptions import (ForbiddenError,ResourceNotFoundError,ConflictEr
 
 from app.models.workspace_member import WorkspaceRole
 from app.models.workspace_invitation import WorkspaceInvitation
-from app.models.workspace_member import (WorkspaceMember,WorkspaceRole,)
+from app.models.workspace_member import (WorkspaceMember,)
 from app.repositories.workspace_repository import WorkspaceRepository
 from app.repositories.workspace_member_repository import (WorkspaceMemberRepository,)
 from app.repositories.workspace_invitation_repository import (WorkspaceInvitationRepository,)
 from app.repositories.auth_repository import AuthRepository
-from app.models import user
 
 
 class WorkspaceMemberService:

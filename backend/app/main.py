@@ -8,13 +8,12 @@ from app.config.settings import settings
 from app.core.handlers import register_exception_handlers
 from app.core.lifespan import lifespan
 from app.core.logger import logger
-from app.core.middleware import RequestContextMiddleware 
 from app.core.exceptions import ResourceNotFoundError
 from app.api.oauth import router as oauth_router
-from app.api.users import router as users_router
 from pathlib import Path
-from fastapi.staticfiles import StaticFiles
 
+
+from fastapi.middleware.cors import CORSMiddleware
 
 configure_logging()
 
@@ -39,6 +38,17 @@ app.mount(
     "/uploads",
     StaticFiles(directory=UPLOAD_DIR),
     name="uploads",
+)
+
+# CORS configuration
+origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret_key,)

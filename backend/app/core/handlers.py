@@ -13,6 +13,7 @@ async def lumora_exception_handler(
         content={
             "success": False,
             "error": exc.message,
+            "detail": exc.message,
         },
     )
 

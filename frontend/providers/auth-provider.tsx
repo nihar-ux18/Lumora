@@ -106,8 +106,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return await authService.register(data);
     },
-    onSuccess: () => {
-      toast.success("Account created successfully. Please sign in.");
+    onSuccess: (data) => {
+      if (data && data.email_error) {
+        toast.warning(data.email_error, { duration: 10000 });
+      } else {
+        toast.success("Account created successfully. Please sign in.");
+      }
       router.push("/auth/login");
     },
     onError: (error: unknown) => {

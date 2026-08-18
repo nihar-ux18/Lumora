@@ -15,7 +15,6 @@ from app.schemas.auth import (LoginRequest, RegisterRequest, TokenResponse)
 from app.schemas.user import UpdateProfileRequest
 from app.repositories.email_verification_repository import (EmailVerificationRepository,)
 from app.models.password_reset import PasswordResetToken
-from app.core.exceptions import ResourceNotFoundError
 from app.services.email_service import send_verification_email
 from app.services.email_service import send_password_reset_email
 
@@ -32,10 +31,15 @@ class AuthService:
         if existing_user:
             raise ConflictError("Email already registered")
 
+        is_dev_test = settings.app_env == "development" and (
+            data.email.endswith("@example.com") or data.email.endswith("@lumora.dev")
+        )
+
         user = User(
             fullname=data.fullname,
             email=data.email,
             password_hash=hash_password(data.password),
+            is_verified=is_dev_test,
         )
 
         user = await self.repository.create_user(user)
@@ -51,14 +55,26 @@ class AuthService:
 
         await self.email_repository.create(verification)
         
-        await send_verification_email(
-        to_email=user.email,
-        to_name=user.fullname,
-        token=verification.token,
-        )
+        email_error = None
+        try:
+            await send_verification_email(
+                to_email=user.email,
+                to_name=user.fullname,
+                token=verification.token,
+            )
+        except Exception as e:
+            logger.error(
+                "Failed to send verification email during registration",
+                error=str(e),
+                email=user.email,
+            )
+            email_error = (
+                "Verification email could not be sent due to email service issues. "
+                "You can verify your email manually using the backend console log."
+            )
 
         verification_link = (
-            f"{settings.backend_url}/auth/verify-email"
+            f"{settings.frontend_url}/auth/verify-email"
             f"?token={verification.token}"
         )
 
@@ -68,9 +84,7 @@ class AuthService:
             verification_link=verification_link,
         )
 
-        # TODO:
-        # await send_verification_email(user.email, verification_link)
-
+        setattr(user, "email_error", email_error)
         return user
     
     async def login(self, data: LoginRequest) -> TokenResponse:
@@ -152,8 +166,22 @@ class AuthService:
     
         await self.email_repository.create(verification)
     
+        try:
+            await send_verification_email(
+                to_email=user.email,
+                to_name=user.fullname,
+                token=verification.token,
+            )
+        except Exception as e:
+            logger.error(
+                "Failed to send verification email during resend",
+                error=str(e),
+                email=user.email,
+            )
+            raise ConflictError("Failed to send verification email. The email provider is temporarily unavailable.")
+
         verification_link = (
-            f"{settings.backend_url}/auth/verify-email"
+            f"{settings.frontend_url}/auth/verify-email"
             f"?token={verification.token}"
         )
     
@@ -220,11 +248,19 @@ class AuthService:
         )
 
         await self.repository.create_password_reset_token(reset_token)
-        await send_password_reset_email(
-        to_email=user.email,
-        to_name=user.fullname,
-        token=reset_token.token,
-        )
+        try:
+            await send_password_reset_email(
+                to_email=user.email,
+                to_name=user.fullname,
+                token=reset_token.token,
+            )
+        except Exception as e:
+            logger.error(
+                "Failed to send password reset email",
+                error=str(e),
+                email=user.email,
+            )
+            raise ConflictError("Failed to send password reset email. The email provider is temporarily unavailable.")
         
     async def reset_password(self,token: str,new_password: str,) -> None:
     

@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from app.repositories.chunk_repository import ChunkRepository
-from app.schemas.quiz import (QuizGenerateRequest,QuizQuestion,QuizResponse,QuizSubmissionRequest,QuizSubmissionResponse,QuizResult,)
+from app.schemas.quiz import (QuizResponse,QuizSubmissionRequest,QuizSubmissionResponse,QuizResult,)
 from app.services.ai_service import AIService
 from app.services.embedding_service import EmbeddingService
 from app.core.exceptions import (ForbiddenError,ResourceNotFoundError,)

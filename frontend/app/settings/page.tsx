@@ -10,6 +10,7 @@ import { Loader2, Upload, User as UserIcon, Save } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { getErrorMessage } from "@/lib/utils";
+import { getBackendUrl } from "@/lib/url";
 
 export default function SettingsPage() {
   const queryClient = useQueryClient();
@@ -85,7 +86,7 @@ export default function SettingsPage() {
                     <div className="relative h-24 w-24 rounded-full overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center">
                       {user?.avatar_url ? (
                         <Image
-                          src={user.avatar_url}
+                          src={getBackendUrl(user.avatar_url)}
                           alt="Avatar"
                           fill
                           className="object-cover"

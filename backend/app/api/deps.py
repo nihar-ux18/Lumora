@@ -28,9 +28,7 @@ from app.services.summary_service import SummaryService
 from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
 from app.services.revision_service import RevisionService
-from app.schemas.revision import RevisionResponse
 from app.services.roadmap_service import RoadmapService
-from app.schemas.roadmap import RoadmapResponse
 
 
 # -------------------------------

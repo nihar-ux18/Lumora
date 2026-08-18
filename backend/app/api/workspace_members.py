@@ -7,7 +7,6 @@ from app.api.deps import (
     get_workspace_member_service,
 )
 from app.models.user import User
-from app.models.workspace_member import WorkspaceRole
 from app.schemas.workspace import (
     AcceptInvitationRequest,
     WorkspaceInvitationCreateRequest,

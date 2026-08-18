@@ -35,4 +35,5 @@ export interface UserResponse {
   is_verified?: boolean;
   is_active?: boolean;
   created_at?: string;
+  email_error?: string | null;
 }
