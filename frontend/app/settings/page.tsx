@@ -10,7 +10,6 @@ import { Loader2, Upload, User as UserIcon, Save } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import { getErrorMessage } from "@/lib/utils";
-import { ErrorState } from "@/components/ui/error-state";
 
 export default function SettingsPage() {
   const queryClient = useQueryClient();

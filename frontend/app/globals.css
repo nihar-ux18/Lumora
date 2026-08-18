@@ -92,3 +92,8 @@
     scroll-behavior: auto !important;
   }
 }
+
+@utility bg-grid-pattern {
+  background-image: radial-gradient(rgba(74, 0, 255, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
