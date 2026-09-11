@@ -1,3 +1,4 @@
+from pathlib import Path
 from uuid import UUID
 from fastapi import UploadFile
 
@@ -10,7 +11,7 @@ from app.services.workspace_member_service import (WorkspaceMemberService,)
 from app.services.embedding_service import EmbeddingService
 from app.services.parser_service import ParserService
 from app.services.chunking_service import ChunkingService
-from app.utils.file_upload import save_resource_file
+from app.services.storage_service import StorageService
 from app.models.chunk import Chunk
 from app.repositories.chunk_repository import ChunkRepository
 
@@ -23,6 +24,7 @@ class ResourceService:
         parser_service: ParserService,
         chunking_service: ChunkingService,
         embedding_service: EmbeddingService,
+        storage_service: StorageService,
     ):
         self.repository = repository
         self.chunk_repository = chunk_repository
@@ -30,6 +32,7 @@ class ResourceService:
         self.workspace_member_service = workspace_member_service
         self.chunking_service = chunking_service
         self.embedding_service = embedding_service
+        self.storage_service = storage_service
 
     async def create_resource(
         self,
@@ -150,13 +153,24 @@ class ResourceService:
             current_user,
         )
     
-        file_path = await save_resource_file(file)
-    
-        resource.file_path = file_path
-    
-        extracted_text = await self.parser_service.extract_text(
-            file_path,
+        storage_path = await self.storage_service.upload_resource(
+            file,
         )
+
+        resource.file_path = storage_path
+
+        file_suffix = Path(file.filename or "").suffix.lower()
+
+        temp_file_path = self.storage_service.download_resource(
+            storage_path,
+            file_suffix,
+        )
+        try:
+            extracted_text = await self.parser_service.extract_text(
+                temp_file_path,
+            )
+        finally:
+            Path(temp_file_path).unlink(missing_ok=True)
     
         chunks = self.chunking_service.chunk_text(
             extracted_text,

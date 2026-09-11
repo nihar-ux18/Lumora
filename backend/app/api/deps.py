@@ -25,6 +25,7 @@ from app.services.parser_service import ParserService
 from app.services.quiz_service import QuizService
 from app.services.resource_service import ResourceService
 from app.services.summary_service import SummaryService
+from app.services.storage_service import StorageService
 from app.services.workspace_member_service import WorkspaceMemberService
 from app.services.workspace_service import WorkspaceService
 from app.services.revision_service import RevisionService
@@ -147,6 +148,7 @@ def get_resource_service(
         parser_service=ParserService(),
         chunking_service=ChunkingService(),
         embedding_service=get_embedding_service(),
+        storage_service=StorageService(),
     )
 
 

@@ -36,6 +36,20 @@ class Settings(BaseSettings):
     )
 
     database_url: str = Field(alias="DATABASE_URL")
+
+    supabase_url: str = Field(
+        alias="SUPABASE_URL",
+    )
+
+    supabase_secret_key: str = Field(
+        alias="SUPABASE_SECRET_KEY",
+    )
+
+    supabase_storage_bucket: str = Field(
+        default="lumora-resources",
+        alias="SUPABASE_STORAGE_BUCKET",
+    )
+
     redis_url: str = Field(alias="REDIS_URL")
 
     jwt_secret_key: str = Field(alias="JWT_SECRET_KEY")
