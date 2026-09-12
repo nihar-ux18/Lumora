@@ -137,6 +137,11 @@ class ResourceService:
                 "You don't have permission to delete resources."
             )
 
+        if resource.file_path:
+            self.storage_service.delete_resource(
+                resource.file_path,
+            )
+
         await self.repository.delete(
             resource,
         )
