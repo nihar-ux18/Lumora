@@ -3,6 +3,9 @@ import os
 import sys
 from urllib.parse import urlparse, urlunparse
 from unittest.mock import MagicMock, AsyncMock
+from pathlib import Path
+from uuid import uuid4
+from tempfile import NamedTemporaryFile
 
 # 1. Dynamically derive the test database URL from settings
 from app.config.settings import Settings
@@ -91,6 +94,45 @@ app.services.email_service.send_email = AsyncMock()
 app.services.email_service.send_verification_email = AsyncMock()
 app.services.email_service.send_password_reset_email = AsyncMock()
 
+class MockStorageService:
+    def __init__(self):
+        self.files = {}
+
+    async def upload_resource(self, file):
+        extension = Path(file.filename or "").suffix.lower()
+
+        if extension not in {
+        ".pdf",
+        ".txt",
+        ".md",
+        ".docx",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        }:
+            from app.core.exceptions import ConflictError
+
+            raise ConflictError("Unsupported file type.")
+
+        storage_path = f"resources/{uuid4()}{extension}"
+
+        self.files[storage_path] = await file.read()
+
+        return storage_path
+
+    def download_resource(self, storage_path, suffix):
+        file_data = self.files[storage_path]
+
+        with NamedTemporaryFile(
+            suffix=suffix,
+            delete=False,
+        ) as temp_file:
+            temp_file.write(file_data)
+            return temp_file.name
+
+    def delete_resource(self, storage_path):
+        self.files.pop(storage_path, None)
+
 # 7. Pytest Imports & Fixtures
 import pytest
 import pytest_asyncio
@@ -100,6 +142,18 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from app.db.base import Base
 from app.models import *  # Registers all models on Base.metadata
 from app.main import app  # type: ignore[no-redef]
+
+from app.api.deps import get_resource_service, get_embedding_service
+from app.repositories.resource_repository import ResourceRepository
+from app.repositories.chunk_repository import ChunkRepository
+from app.repositories.workspace_repository import WorkspaceRepository
+from app.repositories.workspace_member_repository import WorkspaceMemberRepository
+from app.repositories.workspace_invitation_repository import WorkspaceInvitationRepository
+from app.repositories.auth_repository import AuthRepository
+from app.services.resource_service import ResourceService
+from app.services.workspace_member_service import WorkspaceMemberService
+from app.services.parser_service import ParserService
+from app.services.chunking_service import ChunkingService
 
 
 @pytest.fixture(scope="session")
@@ -159,7 +213,32 @@ from httpx import ASGITransport
 
 @pytest_asyncio.fixture
 async def client(db_session):
+    mock_storage = MockStorageService()
+
+    def override_get_resource_service():
+        workspace_member_service = WorkspaceMemberService(
+            workspace_repository=WorkspaceRepository(db_session),
+            member_repository=WorkspaceMemberRepository(db_session),
+            invitation_repository=WorkspaceInvitationRepository(db_session),
+            auth_repository=AuthRepository(db_session),
+        )
+
+        return ResourceService(
+            repository=ResourceRepository(db_session),
+            chunk_repository=ChunkRepository(db_session),
+            workspace_member_service=workspace_member_service,
+            parser_service=ParserService(),
+            chunking_service=ChunkingService(),
+            embedding_service=get_embedding_service(),
+            storage_service=mock_storage,
+        )
+
+    app.dependency_overrides[get_resource_service] = override_get_resource_service
+
     async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
+        transport=ASGITransport(app=app),
+        base_url="http://test",
     ) as ac:
         yield ac
+
+    app.dependency_overrides.clear()

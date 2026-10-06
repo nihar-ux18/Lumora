@@ -50,7 +50,7 @@ class Settings(BaseSettings):
         alias="SUPABASE_STORAGE_BUCKET",
     )
 
-    redis_url: str = Field(alias="REDIS_URL")
+    redis_url: str = Field(default="", alias="REDIS_URL")
 
     jwt_secret_key: str = Field(alias="JWT_SECRET_KEY")
     jwt_algorithm: str = Field(
