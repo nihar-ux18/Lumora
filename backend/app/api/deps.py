@@ -37,9 +37,7 @@ from app.services.roadmap_service import RoadmapService
 # -------------------------------
 
 ai_service = AIService()
-
 _embedding_service = None
-ai_service = AIService()
 
 
 def get_embedding_service() -> EmbeddingService:
@@ -228,7 +226,7 @@ def get_revision_service(
         workspace_repository=WorkspaceRepository(db),
         member_repository=WorkspaceMemberRepository(db),
         chunk_repository=ChunkRepository(db),
-        embedding_service=EmbeddingService(),
+        embedding_service=get_embedding_service(),
         ai_service=get_ai_service(),
     )
     
@@ -243,6 +241,6 @@ def get_roadmap_service(
         workspace_repository=WorkspaceRepository(db),
         member_repository=WorkspaceMemberRepository(db),
         chunk_repository=ChunkRepository(db),
-        embedding_service=EmbeddingService(),
+        embedding_service=get_embedding_service(),
         ai_service=AIService(),
     )

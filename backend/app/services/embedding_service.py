@@ -1,11 +1,10 @@
-from sentence_transformers import SentenceTransformer
-
-
 class EmbeddingService:
     _model = None
 
     def __init__(self):
         if EmbeddingService._model is None:
+            from sentence_transformers import SentenceTransformer
+            
             EmbeddingService._model = SentenceTransformer(
                 "all-MiniLM-L6-v2",
             )
